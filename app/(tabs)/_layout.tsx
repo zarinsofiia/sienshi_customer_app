@@ -1,33 +1,128 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+// app/(tabs)/_layout.tsx
+import React from "react";
+import { Tabs, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLanguage } from "../../contexts/LanguageContext";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const BASE_TAB_HEIGHT = 56;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: "#f59e0b",
+        tabBarInactiveTintColor: "#9ca3af",
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 11,
+        },
+        tabBarStyle: {
+          backgroundColor: "#ffffff",
+          borderTopColor: "#e5e7eb",
+          borderTopWidth: 1,
+          height: BASE_TAB_HEIGHT + insets.bottom,
+          paddingBottom: insets.bottom || 4,
+          paddingTop: 4,
+        },
+      }}
+    >
+      {/* DASHBOARD */}
       <Tabs.Screen
-        name="index"
+        name="dashboard/index"
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.replace("/dashboard");
+          },
+        }}
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: t("tab_home"),
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              color={color}
+              size={size}
+            />
+          ),
         }}
       />
+
+      {/* TRACKING STACK */}
       <Tabs.Screen
-        name="explore"
+        name="tracking"
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.replace("/tracking");
+          },
+        }}
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: t("tab_tracking") || "Tracking",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "map" : "map-outline"}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
+      />
+
+      {/* PARCEL TAB (HIDDEN FOR NOW) */}
+      {/* Remove the visible tab button */}
+      {/*
+      <Tabs.Screen
+        name="parcel"
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.replace("/parcel");
+          },
+        }}
+        options={{
+          title: t("tab_parcel") || "Parcel",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "cube" : "cube-outline"}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
+      />
+      */}
+
+      {/* Keep parcel route available but hidden from tab bar */}
+      <Tabs.Screen
+        name="parcel"
+        options={{
+          href: null,
+        }}
+      />
+
+      {/* USER / ACCOUNT */}
+      <Tabs.Screen
+        name="me"
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.replace("/me");
+          },
+        }}
+        options={{
+          title: t("tab_me"),
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              color={color}
+              size={size}
+            />
+          ),
         }}
       />
     </Tabs>

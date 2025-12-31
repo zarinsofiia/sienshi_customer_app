@@ -1,24 +1,43 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+// app/_layout.tsx
+import React from "react";
+import { Stack } from "expo-router";
+import { View, ActivityIndicator } from "react-native";
+import {
+  useFonts,
+  Karla_400Regular,
+  Karla_500Medium,
+  Karla_700Bold,
+  Karla_800ExtraBold,
+} from "@expo-google-fonts/karla";
+import { LanguageProvider } from "../contexts/LanguageContext";
+import Toast from "react-native-toast-message";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    "Karla-Regular": Karla_400Regular,
+    "Karla-Medium": Karla_500Medium,
+    "Karla-Bold": Karla_700Bold,
+    "Karla-ExtraBold": Karla_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    // simple loading screen while fonts are loading
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <LanguageProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+        {/* if you have /register screen, you can optionally add: */}
+        {/* <Stack.Screen name="register" /> */}
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+      <Toast />
+    </LanguageProvider>
   );
 }
