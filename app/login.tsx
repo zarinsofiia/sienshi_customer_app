@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MobileAlertDialog, {
   BasicMobileDialogState,
 } from "@/components/modal/MobileAlertDialog";
+import { registerPushTokens } from "../hooks/registerPush";
 
 const ORANGE = "#f59e0b";
 const WHITE = "#ffffffff";
@@ -28,6 +29,7 @@ const WHITE = "#ffffffff";
 export default function LoginScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const { t, lang, setLang } = useLanguage();
 
@@ -108,13 +110,33 @@ export default function LoginScreen() {
         console.log("Failed to save currentUser:", e);
       }
 
+      try {
+        const push = await registerPushTokens();
+        console.log("PUSH TOKENS:", push);
+      } catch (e) {
+        console.log("Failed to get push tokens:", e);
+      }
+
+      // 🔹 Apply backend preferred language if provided (same behavior as desktop)
+      const backendLangRaw =
+        data?.lang ??
+        data?.user?.pref_lang ??
+        data?.user?.lang ??
+        data?.users?.pref_lang; // keep fallback if your backend really returns `users`
+
+      const backendLang = (backendLangRaw || "").toString().toLowerCase();
+
+      if (backendLang === "en" || backendLang === "zh") {
+        setLang(backendLang as "en" | "zh"); // this will persist to AsyncStorage via your LanguageContext.setLang
+      }
+
       // ✅ No success dialog / toast — direct in
       router.replace("/dashboard");
     } catch (error) {
       console.log("Login request error:", error);
       showError(
         t("login_error") ||
-          "Something went wrong while logging in. Please try again."
+        "Something went wrong while logging in. Please try again."
       );
     }
   };
@@ -179,23 +201,33 @@ export default function LoginScreen() {
                     labelStyle={styles.label}
                     placeholder={t("login_password_placeholder")}
                     placeholderTextColor="#9ca3af"
-                    secureTextEntry
+                    secureTextEntry={!showPassword} // ✅ toggle
                     autoCapitalize="none"
                     value={password}
                     onChangeText={setPassword}
                     returnKeyType="done"
                     uiSize="md"
                     leftIcon={
-                      <Ionicons
-                        name="lock-closed-outline"
-                        size={16}
-                        color="#9ca3af"
-                      />
+                      <Ionicons name="lock-closed-outline" size={16} color="#9ca3af" />
+                    }
+                    rightIcon={ // ✅ add this (if supported)
+                      <TouchableOpacity
+                        onPress={() => setShowPassword((v) => !v)}
+                        activeOpacity={0.7}
+                        style={styles.eyeBtn}
+                      >
+                        <Ionicons
+                          name={showPassword ? "eye-off-outline" : "eye-outline"}
+                          size={18}
+                          color="#9ca3af"
+                        />
+                      </TouchableOpacity>
                     }
                     containerStyle={styles.inputWrapper}
                     inputStyle={styles.input}
                   />
                 </View>
+
 
                 {/* Forgot password */}
                 <TouchableOpacity style={styles.forgotWrapper}>
@@ -396,4 +428,9 @@ const styles = StyleSheet.create({
     color: "#9ca3af",
     marginHorizontal: 6,
   },
+  eyeBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+  },
+
 });

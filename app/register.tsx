@@ -42,17 +42,17 @@ export default function RegisterScreen() {
   const [customerType, setCustomerType] = useState<CustomerType>("personal");
 
   // Account fields (for both personal & company)
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(
-    null
-  );
+  // const [username, setUsername] = useState("");
+  // const [password, setPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  // const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(
+  //   null
+  // );
 
   // 🔹 Refs for focusing first invalid field
-  const usernameRef = useRef<TextInput | null>(null);
-  const passwordRef = useRef<TextInput | null>(null);
-  const confirmPasswordRef = useRef<TextInput | null>(null);
+  // const usernameRef = useRef<TextInput | null>(null);
+  // const passwordRef = useRef<TextInput | null>(null);
+  // const confirmPasswordRef = useRef<TextInput | null>(null);
 
   const companyNameRef = useRef<TextInput | null>(null);
   const brnNewRef = useRef<TextInput | null>(null);
@@ -87,7 +87,7 @@ export default function RegisterScreen() {
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyContact, setCompanyContact] = useState("");
 
-  const [usernameError, setUsernameError] = useState<string | null>(null);
+  // const [usernameError, setUsernameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
 
   // Person in charge
@@ -193,51 +193,50 @@ export default function RegisterScreen() {
   };
 
   // 🔹 Check duplicate USERNAME
-  const checkUsernameDuplicate = async (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      setUsernameError(null);
-      return;
-    }
+  // const checkUsernameDuplicate = async (value: string) => {
+  //   const trimmed = value.trim();
+  //   if (!trimmed) {
+  //     setUsernameError(null);
+  //     return;
+  //   }
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/check-duplicate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: trimmed }),
-      });
+  //   try {
+  //     const res = await fetch(`${API_BASE_URL}/api/auth/check-duplicate`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ username: trimmed }),
+  //     });
 
-      const data = await res.json().catch(() => null);
-      console.log("check-duplicate username:", res.status, data);
+  //     const data = await res.json().catch(() => null);
+  //     console.log("check-duplicate username:", res.status, data);
 
-      const msg = (data?.message || "").toString();
+  //     const msg = (data?.message || "").toString();
 
-      // ❗ If backend returns error status with message: treat as duplicate
-      if (!res.ok) {
-        if (msg) {
-          setUsernameError(msg); // e.g. "Username is already in use"
-        } else {
-          setUsernameError("Username already in use");
-        }
-        return;
-      }
+  //     if (!res.ok) {
+  //       if (msg) {
+  //         setUsernameError(msg); 
+  //       } else {
+  //         setUsernameError("Username already in use");
+  //       }
+  //       return;
+  //     }
 
-      // ✅ If 200 OK and backend sends some flag instead
-      const isDuplicate =
-        data?.isDuplicate ||
-        data?.exists ||
-        data?.duplicate ||
-        data?.usernameExists;
 
-      if (isDuplicate) {
-        setUsernameError(msg || "Username already in use");
-      } else {
-        setUsernameError(null);
-      }
-    } catch (e) {
-      console.log("checkUsernameDuplicate error:", e);
-    }
-  };
+  //     const isDuplicate =
+  //       data?.isDuplicate ||
+  //       data?.exists ||
+  //       data?.duplicate ||
+  //       data?.usernameExists;
+
+  //     if (isDuplicate) {
+  //       setUsernameError(msg || "Username already in use");
+  //     } else {
+  //       setUsernameError(null);
+  //     }
+  //   } catch (e) {
+  //     console.log("checkUsernameDuplicate error:", e);
+  //   }
+  // };
 
   // 🔹 Check duplicate EMAIL
   const checkEmailDuplicate = async (value: string) => {
@@ -288,24 +287,24 @@ export default function RegisterScreen() {
     // 🔹 Frontend validations before sending
 
     // 1. Password mismatch
-    if (confirmPasswordError) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: confirmPasswordError,
-      });
-      return;
-    }
+    // if (confirmPasswordError) {
+    //   Toast.show({
+    //     type: "error",
+    //     text1: "Error",
+    //     text2: confirmPasswordError,
+    //   });
+    //   return;
+    // }
 
     // 2. Username duplicate error (set from /api/auth/check-duplicate)
-    if (usernameError) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: usernameError,
-      });
-      return;
-    }
+    // if (usernameError) {
+    //   Toast.show({
+    //     type: "error",
+    //     text1: "Error",
+    //     text2: usernameError,
+    //   });
+    //   return;
+    // }
 
     // 3. Email duplicate error (set from /api/auth/check-duplicate)
     if (emailError) {
@@ -411,24 +410,24 @@ export default function RegisterScreen() {
           focus: () => setShowEinvoicePicker(true),
         });
       }
-      if (!username.trim()) {
-        missing.push({
-          label: t("register_username_label"),
-          focus: () => usernameRef.current?.focus(),
-        });
-      }
-      if (!password.trim()) {
-        missing.push({
-          label: t("register_password_label"),
-          focus: () => passwordRef.current?.focus(),
-        });
-      }
-      if (!confirmPassword.trim()) {
-        missing.push({
-          label: t("register_confirm_password_label"),
-          focus: () => confirmPasswordRef.current?.focus(),
-        });
-      }
+      // if (!username.trim()) {
+      //   missing.push({
+      //     label: t("register_username_label"),
+      //     focus: () => usernameRef.current?.focus(),
+      //   });
+      // }
+      // if (!password.trim()) {
+      //   missing.push({
+      //     label: t("register_password_label"),
+      //     focus: () => passwordRef.current?.focus(),
+      //   });
+      // }
+      // if (!confirmPassword.trim()) {
+      //   missing.push({
+      //     label: t("register_confirm_password_label"),
+      //     focus: () => confirmPasswordRef.current?.focus(),
+      //   });
+      // }
 
       if (missing.length > 0) {
         const first = missing[0];
@@ -494,24 +493,24 @@ export default function RegisterScreen() {
           focus: () => deliveryPostcodeRef.current?.focus(),
         });
       }
-      if (!username.trim()) {
-        missing.push({
-          label: t("register_username_label"),
-          focus: () => usernameRef.current?.focus(),
-        });
-      }
-      if (!password.trim()) {
-        missing.push({
-          label: t("register_password_label"),
-          focus: () => passwordRef.current?.focus(),
-        });
-      }
-      if (!confirmPassword.trim()) {
-        missing.push({
-          label: t("register_confirm_password_label"),
-          focus: () => confirmPasswordRef.current?.focus(),
-        });
-      }
+      // if (!username.trim()) {
+      //   missing.push({
+      //     label: t("register_username_label"),
+      //     focus: () => usernameRef.current?.focus(),
+      //   });
+      // }
+      // if (!password.trim()) {
+      //   missing.push({
+      //     label: t("register_password_label"),
+      //     focus: () => passwordRef.current?.focus(),
+      //   });
+      // }
+      // if (!confirmPassword.trim()) {
+      //   missing.push({
+      //     label: t("register_confirm_password_label"),
+      //     focus: () => confirmPasswordRef.current?.focus(),
+      //   });
+      // }
 
       if (missing.length > 0) {
         const first = missing[0];
@@ -557,9 +556,9 @@ export default function RegisterScreen() {
           e_invoice_implementation_date: einvoiceDate,
 
           language: lang,
-          username,
-          password,
-          confirm_password: confirmPassword,
+          // username,
+          // password,
+          // confirm_password: confirmPassword,
         }
         : {
           customer_type: "personal",
@@ -578,9 +577,9 @@ export default function RegisterScreen() {
           },
 
           language: lang,
-          username,
-          password,
-          confirm_password: confirmPassword,
+          // username,
+          // password,
+          // confirm_password: confirmPassword,
           personal_email: personalEmail,
         };
 
@@ -612,20 +611,22 @@ export default function RegisterScreen() {
         return;
       }
 
-      // ✅ Success
-      const msg =
-        data?.message || t("register_success") || "Registration successful.";
+      // // ✅ Success
+      // const msg =
+      //   data?.message || t("register_success") || "Registration successful.";
 
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: msg,
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Success",
+      //   text2: msg,
+      // });
 
-      // optional: small delay so user can see toast before navigation
-      setTimeout(() => {
-        router.replace("/register-success");
-      }, 800);
+      // // optional: small delay so user can see toast before navigation
+      // setTimeout(() => {
+      //   router.replace("/register-success");
+      // }, 800);
+
+      router.replace("/register-success");
     } catch (error) {
       console.log("Request error:", error);
 
@@ -1480,12 +1481,12 @@ export default function RegisterScreen() {
 
                 {/* ACCOUNT LOGIN FIELDS – common for both customer types */}
                 <View style={[styles.fieldGroup, { marginTop: 24 }]}>
-                  <Text style={styles.label}>
+                  {/* <Text style={styles.label}>
                     {t("register_account_section_label")}
-                  </Text>
+                  </Text> */}
 
                   {/* Username */}
-                  <Input
+                  {/* <Input
                     ref={usernameRef}
                     label={t("register_username_label")}
                     labelStyle={styles.label}
@@ -1514,16 +1515,16 @@ export default function RegisterScreen() {
                     inputStyle={styles.input}
                     validationRules={{ required: true }}
                     showValidation={false}
-                  />
+                  /> */}
 
-                  {usernameError && (
+                  {/* {usernameError && (
                     <Text style={styles.passwordErrorText}>
                       {usernameError}
                     </Text>
-                  )}
+                  )} */}
 
                   {/* Password */}
-                  <View style={{ marginTop: 16 }}>
+                  {/* <View style={{ marginTop: 16 }}>
                     <Input
                       ref={passwordRef}
                       label={t("register_password_label")}
@@ -1547,10 +1548,10 @@ export default function RegisterScreen() {
                       validationRules={{ required: true }}
                       showValidation={false}
                     />
-                  </View>
+                  </View> */}
 
                   {/* Confirm Password */}
-                  <View style={{ marginTop: 16 }}>
+                  {/* <View style={{ marginTop: 16 }}>
                     <Input
                       ref={confirmPasswordRef}
                       label={t("register_confirm_password_label")}
@@ -1563,9 +1564,8 @@ export default function RegisterScreen() {
                       onChangeText={(text) => {
                         setConfirmPassword(text);
 
-                        // 🔹 frontend validation while typing
+                     
                         if (!text || !password) {
-                          // if either is empty, don't show error yet
                           setConfirmPasswordError(null);
                           return;
                         }
@@ -1590,13 +1590,12 @@ export default function RegisterScreen() {
                       showValidation={false}
                     />
 
-                    {/* 🔹 show error text manually, outside Input */}
                     {confirmPasswordError && (
                       <Text style={styles.passwordErrorText}>
                         {confirmPasswordError}
                       </Text>
                     )}
-                  </View>
+                  </View> */}
                 </View>
 
                 <AsyncButton

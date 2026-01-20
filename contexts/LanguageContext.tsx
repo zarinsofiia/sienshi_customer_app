@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import en, { EnTranslationKey } from "../locales/en";
 import zh from "../locales/zh";
 import { API_BASE_URL } from "../config/api";
+import { authedFetch } from "../config/mobileApiClient";
 
 type Language = "en" | "zh";
 
@@ -21,8 +22,10 @@ type TranslationKey = EnTranslationKey;
 
 type LanguageContextValue = {
   lang: Language;
-  setLang: (lang: Language) => void; // local-only set + persist
-  changeLang: (lang: Language) => Promise<boolean>; // persist + (optional) call API
+  // local-only setter (no API)
+  setLang: (lang: Language) => void;
+  // use this when user explicitly changes language from Settings (calls API + persist)
+  changeLang: (lang: Language) => Promise<boolean>;
   t: (key: TranslationKey) => string;
   langReady: boolean;
 };
@@ -37,7 +40,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Language>("en");
   const [langReady, setLangReady] = useState(false);
 
-  // Load saved language
+  // Load saved language on app start
   useEffect(() => {
     (async () => {
       try {
@@ -46,13 +49,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           setLangState(saved);
         }
       } catch (e) {
-        console.log("[LanguageContext] load lang failed:", e);
+        console.log("[LanguageContext] load saved lang failed:", e);
       } finally {
         setLangReady(true);
       }
     })();
   }, []);
 
+  // local-only setter (used by login toggle etc)
   const setLang = useCallback((newLang: Language) => {
     setLangState(newLang);
     AsyncStorage.setItem(LANG_STORAGE_KEY, newLang).catch((e) =>
@@ -60,43 +64,34 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  /**
-   * Persist locally + try backend.
-   * If backend fails, UI still uses the selected language locally.
-   */
+  // Settings uses this: persist + call API
   const changeLang = useCallback(
     async (newLang: Language) => {
+      // update UI immediately (optimistic)
       const prev = lang;
-
-      // optimistic UI
       setLang(newLang);
 
       try {
-        const token = await AsyncStorage.getItem("authToken");
-
-        const res = await fetch(`${API_BASE_URL}/api/settings/changeLang`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ lang: newLang }),
-        });
+        const res = await authedFetch(
+          `${API_BASE_URL}/api/settings/changeLang`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lang: newLang }),
+          }
+        );
 
         if (!res.ok) {
-          console.log("[changeLang] backend failed status:", res.status);
-          // revert to previous if you want strict server truth:
-          // setLang(prev);
-          // return false;
-
-          // or keep local language (recommended for customer app UX):
+          console.log("[changeLang] failed status:", res.status);
+          // revert if backend rejects
+          setLang(prev);
           return false;
         }
 
         return true;
       } catch (e) {
-        console.log("[changeLang] backend error:", e);
-        // keep local language; do not revert
+        console.log("[changeLang] error:", e);
+        setLang(prev);
         return false;
       }
     },
@@ -124,8 +119,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
-  if (!ctx) {
-    throw new Error("useLanguage must be used inside LanguageProvider");
-  }
+  if (!ctx) throw new Error("useLanguage must be used inside LanguageProvider");
   return ctx;
 }

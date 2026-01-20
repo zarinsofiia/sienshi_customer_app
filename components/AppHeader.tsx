@@ -1,17 +1,25 @@
 // components/AppHeader.tsx
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useLanguage } from "../contexts/LanguageContext";
 
 type AppHeaderProps = {
-  // either pass a raw title OR a translation key
   title?: string;
-  titleKey?: string; // e.g. "header_dashboard"
-  showBack?: boolean;          // show back button on left
-  showNotification?: boolean;  // show notification icon on right (e.g. Dashboard)
-  onBack?: () => void;         // optional custom back handler
+  titleKey?: string;
+  showBack?: boolean;
+  showNotification?: boolean;
+  onBack?: () => void;
+
+  // ✅ overrides
+  containerStyle?: ViewStyle;
+  titleStyle?: TextStyle;
+  leftIconColor?: string;
+  rightIconColor?: string;
+  // ✅ custom right action (e.g. QR button)
+  rightAction?: React.ReactNode;
+
 };
 
 export function AppHeader({
@@ -20,6 +28,12 @@ export function AppHeader({
   showBack = false,
   showNotification = false,
   onBack,
+
+  containerStyle,
+  titleStyle,
+  leftIconColor = "#ffffff",
+  rightIconColor = "#ffffff",
+  rightAction,
 }: AppHeaderProps) {
   const router = useRouter();
   const { t } = useLanguage();
@@ -28,52 +42,37 @@ export function AppHeader({
   const upperTitle = rawTitle.toUpperCase();
 
   const handleBack = () => {
-    if (onBack) {
-      onBack();
-      return;
-    }
-
-    // default behaviour: go to dashboard root with replace
+    if (onBack) return onBack();
     router.replace("/dashboard" as any);
   };
 
   return (
-    <View style={styles.container}>
-      {/* LEFT SIDE (back button) */}
+    <View style={[styles.container, containerStyle]}>
       <View style={styles.side}>
         {showBack && (
-          <TouchableOpacity
-            onPress={handleBack}
-            style={styles.iconButton}
-          >
-            <Ionicons name="arrow-back" size={20} color="#ffffffff" />
+          <TouchableOpacity onPress={handleBack} style={styles.iconButton}>
+            <Ionicons name="arrow-back" size={20} color={leftIconColor} />
           </TouchableOpacity>
         )}
       </View>
 
-      {/* CENTER TITLE */}
       <View style={styles.center}>
-        <Text style={styles.title}>{upperTitle}</Text>
+        <Text style={[styles.title, titleStyle]}>{upperTitle}</Text>
       </View>
 
-      {/* RIGHT SIDE (notification) */}
       <View style={[styles.side, styles.rightSide]}>
-        {showNotification && (
+        {rightAction ? (
+          rightAction
+        ) : showNotification ? (
           <TouchableOpacity
-            onPress={() => {
-              // TODO: navigate to notification screen later
-              console.log("Notification pressed");
-            }}
+            onPress={() => console.log("Notification pressed")}
             style={styles.iconButton}
           >
-            <Ionicons
-              name="notifications-outline"
-              size={20}
-              color="#ffffffff"
-            />
+            <Ionicons name="notifications-outline" size={20} color={rightIconColor} />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
+
     </View>
   );
 }

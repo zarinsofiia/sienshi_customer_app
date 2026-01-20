@@ -104,6 +104,28 @@ export default function TabsLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="calculator"
+        options={{
+          href: null
+
+        }}
+      />
+
+      <Tabs.Screen
+        name="shipment"
+        options={{
+          href: null
+        }}
+      />
+
+      <Tabs.Screen 
+      name="announcement"
+        options={{
+          href: null
+        }} />
+
+
 
       {/* USER / ACCOUNT */}
       <Tabs.Screen

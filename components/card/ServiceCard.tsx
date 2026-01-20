@@ -38,7 +38,7 @@ export default function ServiceCard({
 
 const styles = StyleSheet.create({
   serviceCard: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: "#ffffff",
     borderRadius: 16,
     paddingVertical: 16,
@@ -46,11 +46,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F2C545",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
-    elevation: 3,
+   
   },
   serviceLabel: {
     marginTop: 8,

@@ -12,7 +12,7 @@ import {
 const DEFAULT_ORANGE = "#f59e0b";
 
 // 🔒 single source of truth for hero height
-export const HERO_HEIGHT = 150; // tweak this number
+export const HERO_HEIGHT = 140; // tweak this number
 export const HERO_RADIUS = 50;
 
 type ScreenHeroProps = {
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   subtitle: {
     marginTop: 4,
     fontSize: 13,
-    fontFamily: "Karla-Medium",
+    fontFamily: "Karla-ExtraBold",
     color: "#fef3c7",
     textAlign: "center",
   },

@@ -15,13 +15,25 @@ import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
 import { authedFetch } from "../../../config/mobileApiClient";
 import { useLanguage } from "../../../contexts/LanguageContext";
-
 const ORANGE = "#f59e0b";
 
-type ParcelLite = {
+type Parcel = {
   id: number;
+  cust_code: string | null;
+  parcel_no: string | null;
+  box_amt: string | null;
+  gross_weight: string | null;
+  total_weight: string | null;
+  box_height: string | null;
+  box_width: string | null;
+  box_length: string | null;
   parcel_tracking: string | null;
-  status?: string | null; // optional (fallback only)
+  display_status: string | null;
+  manifest_id: number | null;
+  status: string | null;
+  delivery_type: string | null;
+  box_m3: string | null;
+  stockin_id: number | null;
 };
 
 type TimelineRow = {
@@ -46,18 +58,8 @@ function formatDateTime(iso: string | null | undefined) {
   if (Number.isNaN(d.getTime())) return "-";
 
   const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
 
   const dd = String(d.getDate()).padStart(2, "0");
@@ -67,6 +69,26 @@ function formatDateTime(iso: string | null | undefined) {
   const min = String(d.getMinutes()).padStart(2, "0");
 
   return `${dd} ${mm} ${yyyy} ${hh}:${min}`;
+}
+
+function statusTitle(status: string) {
+  const map: Record<string, string> = {
+    cn_warehouse: "Parcel at China Warehouse",
+    on_declaration: "Declaration in Progress",
+    in_shipment: "Shipping in Progress",
+    container_packed: "Container Packed",
+    arrived_at_port: "Arrived at Port",
+    my_customs_inspection_kch: "Inspection in Kuching",
+    customs_clearance_in_progress: "Customs Clearance in Progress",
+    kch_custom: "Kuching Customs",
+    kch_warehouse: "Arrived at Kuching Warehouse",
+    out_for_delivery: "Out for Delivery",
+    delivered: "Delivered",
+    cn_customs_clearance: "Customs Clearance (China)",
+    cn_customs_inspection: "Inspection in China",
+  };
+
+  return map[status] || prettifyStatus(status);
 }
 
 async function safeJson(res: Response) {
@@ -98,50 +120,28 @@ function getStatusIcon(status: string | null | undefined): IoniconName {
     kch_warehouse: "business-outline",
     out_for_delivery: "car-outline",
     delivered: "checkmark-done-outline",
-
-    arranging: "time-outline",
-    ready_to_pickup: "storefront-outline",
-    estimated_arrival: "calendar-outline",
   };
 
   return map[s] || "cube-outline";
 }
 
-export default function TrackingDetailScreen() {
-  const { t } = useLanguage();
-  const tAny = t as unknown as (k: string) => string;
-
+export default function ShipmentDetailScreen() {
   const router = useRouter();
   const { parcelId, trackingId, backTo } = useLocalSearchParams<{
     parcelId?: string;
-    trackingId?: string;
+    trackingId?: string; // optional display
     backTo?: string;
   }>();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [parcel, setParcel] = useState<ParcelLite | null>(null);
+  const [parcel, setParcel] = useState<Parcel | null>(null);
   const [timeline, setTimeline] = useState<TimelineRow[]>([]);
 
   const handleBack = () => {
     if (backTo) router.replace(backTo as any);
     else router.back();
-  };
-
-  // ✅ translate by key: tracking_status_<status>
-  // ✅ always UPPERCASE display
-  const statusTitle = (statusRaw: string) => {
-    const status = (statusRaw || "").toString().trim().toLowerCase();
-    if (!status) return "-";
-
-    const key = `tracking_status_${status}`;
-    const translated = tAny(key);
-
-    const finalText =
-      !translated || translated === key ? prettifyStatus(status) : translated;
-
-    return (finalText || "-").toUpperCase();
   };
 
   useEffect(() => {
@@ -163,11 +163,9 @@ export default function TrackingDetailScreen() {
         setParcel(null);
         setTimeline([]);
 
-        // ✅ UPDATED ROUTE
+        // ✅ ONLY: Get timeline by parcel id
         const res = await authedFetch(
-          `/api/cust_app/parcels/get_timeline?id=${encodeURIComponent(
-            String(pid)
-          )}`,
+          `/api/parcels/get_timeline?id=${encodeURIComponent(String(pid))}`,
           { method: "GET" }
         );
 
@@ -176,7 +174,7 @@ export default function TrackingDetailScreen() {
           throw new Error(data?.message || `Request failed (${res.status})`);
         }
 
-        const p2: ParcelLite | null =
+        const p2: Parcel | null =
           Array.isArray(data?.parcel) && data.parcel.length
             ? data.parcel[0]
             : null;
@@ -199,17 +197,21 @@ export default function TrackingDetailScreen() {
     };
 
     load();
+
     return () => {
       cancelled = true;
     };
   }, [parcelId]);
 
-  // ✅ latest on top
+  // ✅ Keep duplicates; show remarks if exists; sort newest first
   const steps = useMemo(() => {
     const rows = Array.isArray(timeline) ? [...timeline] : [];
-    rows.sort(
-      (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
-    );
+
+    rows.sort((a, b) => {
+      const ta = new Date(a.datetime).getTime();
+      const tb = new Date(b.datetime).getTime();
+      return tb - ta; // newest first
+    });
 
     return rows.map((r, index) => ({
       key: String(r.id),
@@ -219,7 +221,7 @@ export default function TrackingDetailScreen() {
       active: index === 0,
       statusKey: (r.tracking_status || "").toString().trim().toLowerCase(),
     }));
-  }, [timeline, t]);
+  }, [timeline]);
 
   const currentStatusKey = useMemo(() => {
     if (steps.length > 0) return steps[0].statusKey;
@@ -229,7 +231,7 @@ export default function TrackingDetailScreen() {
   const currentStatus = useMemo(() => {
     if (steps.length > 0) return steps[0].title;
     return parcel?.status ? statusTitle(parcel.status) : "-";
-  }, [steps, parcel?.status, t]);
+  }, [steps, parcel]);
 
   const lastUpdate = useMemo(() => {
     if (steps.length > 0) return steps[0].time;
@@ -237,51 +239,44 @@ export default function TrackingDetailScreen() {
   }, [steps]);
 
   const trackingText = useMemo(() => {
-    const tid = (trackingId || "").toString().trim();
-    if (tid) return tid;
-
+    const t = (trackingId || "").toString().trim();
+    if (t) return t;
     const p = (parcel?.parcel_tracking || "").toString().trim();
     return p || "-";
   }, [trackingId, parcel]);
 
+
+  const { t } = useLanguage();
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <AppHeader
-        title={t("header_tracking_detail")}
-        showBack
-        onBack={handleBack}
-      />
+      <AppHeader title={t("header_shipment")} showBack onBack={handleBack} />
 
-      {/* ✅ FIXED HERO (no page scroll) */}
       <ScreenHero
         backgroundColor={ORANGE}
         style={styles.hero}
         contentStyle={styles.heroContent}
       >
-        <Text style={styles.heroLabel}>{t("td_tracking_id")}</Text>
+        <Text style={styles.heroLabel}>{t("sd_tracking_id")}</Text>
         <Text style={styles.heroTrackingId}>{trackingText}</Text>
 
-        <Text style={[styles.heroLabel, { marginTop: 16 }]}>
-          {t("td_current_status")}
-        </Text>
+        <Text style={[styles.heroLabel, { marginTop: 16 }]}>{t("sd_current_status")}</Text>
         <Text style={styles.heroDate}>{currentStatus}</Text>
 
         <Text style={[styles.heroSmall, { marginTop: 6 }]}>
-          {t("td_last_update")}: {lastUpdate}
+          Last update: {lastUpdate}
         </Text>
       </ScreenHero>
 
-      {/* ✅ MAIN AREA IS FIXED; CARD FILLS SCREEN */}
       <View style={styles.main}>
         <SectionCard
           containerStyle={styles.timelineCard}
-          title={t("td_title")}
+          title="TRACK PARCEL"
           titleStyle={styles.cardTitle}
         >
           {loading ? (
             <View style={styles.centerBox}>
               <ActivityIndicator />
-              <Text style={styles.centerText}>{t("td_loading")}</Text>
+              <Text style={styles.centerText}>{t("sd_loading")}</Text>
             </View>
           ) : error ? (
             <View style={styles.centerBox}>
@@ -302,13 +297,11 @@ export default function TrackingDetailScreen() {
 
               {steps.length === 0 ? (
                 <View style={styles.centerBox}>
-                  <Text style={styles.centerText}>{t("td_no_timeline")}</Text>
+                  <Text style={styles.centerText}>{t("sd_no_timeline")}</Text>
                 </View>
               ) : (
-                // ✅ ONLY TIMELINE SCROLLS
                 <ScrollView
-                  style={styles.timelineScroll}
-                  contentContainerStyle={styles.timelineScrollContent}
+                  style={{ maxHeight: 520 }}
                   showsVerticalScrollIndicator={false}
                 >
                   <View style={styles.stepsWrapper}>
@@ -348,7 +341,7 @@ export default function TrackingDetailScreen() {
 
                           {step.remarks ? (
                             <Text style={styles.stepRemarks}>
-                              {t("td_remarks")} : {step.remarks}
+                              {t("sd_remarks")}: {step.remarks}
                             </Text>
                           ) : null}
                         </View>
@@ -373,7 +366,7 @@ const styles = StyleSheet.create({
 
   hero: {
     paddingHorizontal: 20,
-    paddingTop: 1,
+    paddingTop: 2,
     paddingBottom: 60,
   },
   heroContent: {
@@ -405,17 +398,14 @@ const styles = StyleSheet.create({
     color: "#fff7ed",
   },
 
-  // ✅ fixed main area; card fills the remaining screen height
   main: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 14,
-    marginTop: -10, // keep your overlap look
+    paddingBottom: 24,
+    marginTop: -40,
   },
 
-  timelineCard: {
-    flex: 1, // ✅ makes the white card fit the screen area
-  },
+  timelineCard: {},
 
   cardTitle: {
     fontSize: 12,
@@ -426,7 +416,6 @@ const styles = StyleSheet.create({
   },
 
   centerBox: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 18,
@@ -444,15 +433,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 10,
   },
-
-  // ✅ scroll only this area
-  timelineScroll: {
-    flex: 1,
-  },
-  timelineScrollContent: {
-    paddingBottom: 12,
-  },
-
   stepsWrapper: {
     marginTop: 4,
   },
@@ -480,12 +460,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
-    textTransform: "uppercase",
   },
   stepTitleActive: {
     fontFamily: "Karla-Bold",
     color: "#111827",
-    textTransform: "uppercase",
   },
   stepTime: {
     fontSize: 11,

@@ -17,6 +17,7 @@ type SectionCardProps = {
   containerStyle?: StyleProp<ViewStyle>;
   /** Extra style overrides for the title text */
   titleStyle?: StyleProp<TextStyle>;
+  footer?: ReactNode;
 };
 
 export default function SectionCard({
@@ -24,12 +25,22 @@ export default function SectionCard({
   children,
   containerStyle,
   titleStyle,
+  footer
 }: SectionCardProps) {
   return (
     <View style={[styles.card, containerStyle]}>
-      {title ? (
-        <Text style={[styles.cardTitle, titleStyle]}>{title}</Text>
+      {title || footer ? (
+        <View style={styles.headerRow}>
+          {title ? (
+            <Text style={[styles.cardTitle, titleStyle]}>{title}</Text>
+          ) : (
+            <View />
+          )}
+
+          {footer ? <View>{footer}</View> : null}
+        </View>
       ) : null}
+
       {children}
     </View>
   );
@@ -53,6 +64,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Karla-ExtraBold",
     color: "#111827",
+    // marginBottom: 16,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
+
 });

@@ -203,38 +203,189 @@ const en = {
   header_tracking: "Tracking",
   header_parcel: "Parcel",
   header_me: "My Profile",
+  header_calculator: "Calculator",
+  header_shipment: "Shipment",
 
 
   me_profile: "Edit Profile Information",
   me_change_password: "Change Password",
   me_settings: "Settings",
   me_header_pill: "My Account",
+  me_login_required: "Login to access your account settings.",
+  me_login_required_sub: "Login to manage your account",
 
+  me_profile_sub: "Name · Email · Phone and more",
+  me_change_password_sub: "Click to change password",
+
+
+  login: "Login",
+  edit: "Edit",
+  loading: "Loading...",
   // SETTINGS
-settings_title: "Settings",
-settings_notifications: "Notifications",
-settings_notifications_desc: "Enable push notifications",
-settings_dark_mode: "Dark Mode",
-settings_dark_mode_desc: "Use dark theme",
-settings_language: "Language",
-settings_language_desc: "Change app language",
+  settings_title: "Settings",
+  settings_notifications: "Notifications",
+  settings_notifications_desc: "Enable push notifications",
+  settings_dark_mode: "Dark Mode",
+  settings_dark_mode_desc: "Use dark theme",
+  settings_language: "Language",
+  settings_language_desc: "Change app language",
 
 
-settings_success_title: "Success",
-settings_error_title: "Error",
-settings_lang_set_en: "Language set to English",
-settings_lang_set_zh: "Language set to Chinese",
-settings_lang_change_failed: "Failed to change language",
-common_ok: 'OK',
+  settings_success_title: "Success",
+  settings_error_title: "Error",
+  settings_lang_set_en: "Language set to English",
+  settings_lang_set_zh: "Language set to Chinese",
+  settings_lang_change_failed: "Failed to change language",
+  common_ok: 'OK',
 
-dashboard_welcome_title: "Welcome, {name}!",
-dashboard_guest: "Guest",
-dashboard_welcome_subtitle: "Track your shipment",
+  dashboard_welcome_title: "Welcome, {name}!",
+  dashboard_guest: "Guest",
+  dashboard_welcome_subtitle: "Track your shipment",
 
-dashboard_services: "Services",
-dashboard_track_parcel: "Track Parcel",
-dashboard_shipment_list: "Shipment List",
-dashboard_recent: "Recent",
+  dashboard_services: "Services",
+  dashboard_track_parcel: "Track Parcel",
+  dashboard_shipment_list: "Shipment List",
+  dashboard_recent: "Recent",
+  dashboard_announcement: "Announcement",
+  dashboard_no_announcement_title: "No announcements yet",
+  dashboard_no_announcement_sub: "Updates from our team will appear here.",
+
+  dashboard_search_placeholder: "Enter Tracking No",
+
+  dashboard_calculator: "Calculator",
+
+
+
+  //tracking page
+  tracking_title: "Tracking",
+  tracking_subtitle: "Track your parcel",
+  tracking_search_placeholder: "Search",
+  tracking_no_parcels: "No Parcels",
+  tracking_login_prompt: "Login to see all parcels",
+  tracking_login_button: "Login",
+  tracking_loading: "Loading...",
+  tracking_searching: "Searching",
+  tracking_search_result: "Search Results",
+
+
+
+
+
+  //shipment
+  shipment_title: "Shipment",
+  shipment_subtitle: "View all your parcels",
+  shipment_search_placeholder: "Search",
+  shipment_searching: "Searching...",
+  shipment_search_result: "Search Results",
+  shipment_loading: "Loading...",
+  shipment_login_prompt: "Login to see all parcels",
+  shipment_no_parcels: "No Parcels",
+  shipment_login_button: "Login",
+  shipment_total_weight: "Total Weight (kg)",
+  shipment_volume: "Volume (m³) ",
+
+  //detail page
+  header_tracking_detail: "Tracking Detail",
+  td_tracking_id: "Tracking No",
+  td_current_status: "Current Status",
+  td_last_update: "Last Update",
+  td_title: "Track Parcel",
+  td_loading: "Loading",
+  td_no_timeline: "No timeline yet",
+  td_remarks: "Remarks",
+
+  tracking_status_cn_warehouse: "Parcel at China Warehouse",
+  tracking_status_on_declaration: "Declaration in Progress",
+  tracking_status_in_shipment: "Shipping in Progress",
+  tracking_status_container_packed: "Container Packed",
+  tracking_status_arrived_at_port: "Arrived at Port",
+  tracking_status_my_customs_inspection_kch: "Inspection in Kuching",
+  tracking_status_customs_clearance_in_progress: "Customs Clearance in Progress",
+  tracking_status_kch_custom: "Kuching Customs",
+  tracking_status_kch_warehouse: "Arrived at Kuching Warehouse",
+  tracking_status_out_for_delivery: "Out for Delivery",
+  tracking_status_delivered: "Delivered",
+  tracking_status_cn_customs_clearance: "Customs Clearance (China)",
+  tracking_status_cn_customs_inspection: "Inspection in China",
+  //calculator
+  calc_title: "Parcel Calculator",
+  calc_subtitle: " Enter size (cm) & weight (kg). Volume (m³) will be calculated automatically.",
+  calc_length: "Length (cm)",
+  calc_width: "Width (cm)",
+  calc_height: "Height (cm)",
+  calc_volume: "Volume (m³)",
+  calc_weight: "Weight (kg)",
+  calc_calculate_button: "Calculate",
+  calc_reset_button: "Reset",
+  calc_result_section: "Result",
+  calc_total_price: "Total Price",
+  calc_ok_label: "OK",
+
+  //shipment detail page
+  sd_tracking_id: "Tracking ID",
+  sd_current_status: "Current Status",
+  sd_loading: "Loading",
+  sd_no_timeline: "No timeline yet",
+  sd_remarks: "Remarks",
+
+  //announcement 
+  announcement_loading: "Loading",
+  announcement_not_found: "Announcement not found",
+  announcement_try_again: "Please try again later",
+
+  //me
+  me_delivery_address: 'Delivery Address',
+  copy: "Copy",
+  ok: "Ok",
+  me_no_address_title: 'No Address',
+  me_delivery_address_empty: "Delivery address is empty",
+  me_copied: 'Copied',
+  me_copied_message: 'Delivery address copied to clipboard',
+  me_error: "Error",
+  me_error_message: "Failed to copy address",
+  me_qr_login_required: "Login to see your QR",
+  me_qr_login_message: "Please login to view your QR code.",
+  me_my_qr: "My QR",
+  me_qr_close: "Close",
+  me_saved: "Saved",
+  me_profile_saved_message: "Profile Saved",
+  me_updated: "Updated",
+  me_address_updated: "Address updated",
+  me_profile_title: "Profile",
+  me_full_name: "Full name",
+  me_full_name_placeholder: "Enter full name",
+  me_email: "Email",
+  me_email_placeholder: "Enter email address",
+  me_phone: "Phone",
+  me_phone_placeholder: "Enter phone number",
+  me_addresses: "Addresses",
+  me_shipping_address: "Shipping Address (Give to Seller)",
+  me_delivery_address_home: "Delivery Adress (Your Home)",
+  me_edit_shipping_address: "Edit Shipping Address",
+  me_edit_delivery_address: "Edit Delivery Address",
+  me_save: "Save",
+  me_cancel: "Cancel",
+  me_receiver_name: "Receiver Name",
+  me_receiver_name_placeholder: "Enter Receiver Name",
+  me_address_line_1: "Address Line 1",
+  me_address_line_1_placeholder: "Enter address",
+  me_address_line_2: "Address Line 2",
+  me_address_line_2_placeholder: "Enter address",
+  me_postcode: "Postcode",
+  me_city: "City",
+  me_city_placeholder: "e.g. Kuching",
+  me_state: "State",
+  me_state_placeholder: "e.g. Sarawak",
+  me_country: "Country",
+  me_country_placeholder: "e.g. Malaysia",
+  me_note: "Note (Optional)",
+  me_note_placeholder: "Optional"
+
+
+
+
+
+
 
 };
 

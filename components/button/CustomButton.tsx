@@ -4,7 +4,7 @@ import Button from "./Button";
 import { ButtonProps } from "./ButtonConfig";
 
 // add new preset name in the union
-type CustomPreset = "view" | "print" | "approve" | "danger" | "success" | "info";
+type CustomPreset = "view" | "print" | "approve" | "danger" | "success" | "info" | "primary";
 
 export interface CustomButtonProps
     extends Omit<ButtonProps, "variant" | "bgColor" | "color"> {
@@ -42,6 +42,11 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             textColor = "#ffffff";
             borderColor = "#f59e0b";
             break;
+              case "primary":
+            bgColor = "#f59e0b";
+            textColor = "#ffffff";
+            borderColor = "#f59e0b";
+            break;
         case "danger":
             bgColor = "#fee2e2"; // light red
             textColor = "#b91c1c";
@@ -57,6 +62,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             textColor = "#0f172a";            // dark text for contrast
             borderColor = "#77E6FF";
             break;
+       
 
     }
 
