@@ -29,6 +29,7 @@ type SearchBarProps = {
   rightIconName?: string;
   rightIconColor?: string;
 
+  onClear?: () => void;
   /** Optional overrides for layout */
   containerStyle?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
@@ -43,10 +44,17 @@ export default function SearchBar({
   leftIconName = "search",
   rightIconName = "search",
   rightIconColor = ORANGE,
+  onClear,
   containerStyle,
   inputStyle,
   buttonStyle,
 }: SearchBarProps) {
+
+  const showClear = !!value?.trim();
+  const handleClear = () => {
+    if (onClear) onClear();
+    else onChangeText("");
+  };
   return (
     <View style={[styles.searchBar, containerStyle]}>
       <View style={styles.searchLeft}>
@@ -68,6 +76,20 @@ export default function SearchBar({
           returnKeyType={onSearch ? "search" : "done"}
           onSubmitEditing={onSearch}
         />
+
+        {/* ✅ Clear (x) button */}
+        {showClear ? (
+          <TouchableOpacity
+            onPress={handleClear}
+            activeOpacity={0.8}
+            style={styles.clearButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close-circle" size={25} color="#f59e0b" />
+          </TouchableOpacity>
+        ) : null}
+
+
       </View>
 
       <TouchableOpacity
@@ -117,4 +139,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: 8,
   },
+  clearButton: {
+    marginLeft: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
 });

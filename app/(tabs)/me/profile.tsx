@@ -1,31 +1,50 @@
 // app/(tabs)/me/profile.tsx
 
-import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppHeader } from "../../../components/AppHeader";
 import ScreenHero from "../../../components/layout/ScreenHero";
-import CustomButton from "../../../components/button/CustomButton";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import MobileAlertDialog, {
   BasicMobileDialogState,
 } from "../../../components/modal/MobileAlertDialog";
 import MobileFormModal from "../../../components/modal/MobileFormModal";
-import { useLanguage } from "@/contexts/LanguageContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../../../config/api";
+import { authedFetch } from "../../../config/mobileApiClient";
+import { Save } from "lucide-react-native";
+import CustomButton from "@/components/button/CustomButton";
 const ORANGE = "#f59e0b";
 const BORDER = "#e5e7eb";
 const MUTED = "#6b7280";
+type MeInfo = {
+  name?: string | null;
+  email?: string | null;
+  username?: string | null;
+  phone?: string | null;
+  address1?: string | null;
+  address2?: string | null;
+  address3?: string | null;
+  postcode?: string | null;
+  state?: string | null;
+  city?: string | null;
+  country?: string | null;
+  cust_code?: string | null;
+};
 
 type Addr = {
   name?: string;
@@ -61,35 +80,117 @@ export default function MeProfileScreen() {
   const [dialog, setDialog] = useState<BasicMobileDialogState | null>(null);
   const closeDialog = () => setDialog(null);
 
-  // ✅ Hardcode profile (later hook API/storage)
-  const [fullName, setFullName] = useState("ADMIN");
-  const [email, setEmail] = useState("admin@gmail.com");
-  const [phone, setPhone] = useState("0123456789");
+  const [loading, setLoading] = useState(true);
+  const [meInfo, setMeInfo] = useState<MeInfo | null>(null);
 
-  // ✅ Hardcode addresses
+  // ✅ From API
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
+  // ✅ Shipping = warehouse address (static), but receiver name/phone uses API + cust_code
   const [shipping, setShipping] = useState<Addr>({
-    name: "SOFIA (CUST123)",
-    phone: "012-3456789",
+    name: "",
+    phone: "",
     line1: "Softworld Logistics Warehouse",
     line2: "Lot 88, Jalan Pending, Pending Industrial Area",
     postcode: "93450",
     city: "Kuching",
     state: "Sarawak",
     country: "Malaysia",
-    note: "Put your customer code in receiver name.",
-  });
-
-  const [delivery, setDelivery] = useState<Addr>({
-    name: "Sofia",
-    phone: "012-3456789",
-    line1: "No. 12, Jalan Green Heights",
-    line2: "Taman Green",
-    postcode: "93350",
-    city: "Kuching",
-    state: "Sarawak",
-    country: "Malaysia",
     note: "",
   });
+
+
+  // ✅ Delivery = customer delivery address from API
+  const [delivery, setDelivery] = useState<Addr>({
+    name: "",
+    phone: "",
+    line1: "",
+    line2: "",
+    postcode: "",
+    city: "",
+    state: "",
+    country: "",
+    note: "",
+  });
+  useEffect(() => {
+    const loadMeInfo = async () => {
+      try {
+        setLoading(true);
+
+        // optional guard: if no token, keep empty UI
+        const token = await AsyncStorage.getItem("authToken");
+        if (!token) {
+          setMeInfo(null);
+          return;
+        }
+
+        const res = await authedFetch(`${API_BASE_URL}/api/cust_app/me/info`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const text = await res.text().catch(() => "");
+        let data: any = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch {
+          data = null;
+        }
+
+        if (!res.ok || !data) {
+          console.log("me/info error:", res.status, text);
+          setMeInfo(null);
+          return;
+        }
+
+        const info = data as MeInfo;
+        setMeInfo(info);
+
+        setFullName((info.name || "").toString());
+        setEmail((info.email || "").toString());
+        setPhone((info.phone || "").toString());
+
+        const name = (info.name || "").toString().trim();
+        const custCode = (info.cust_code || "").toString().trim();
+        const receiverName = custCode ? `${name} (${custCode})`.trim() : name;
+
+        // Shipping receiver updates
+        setShipping((prev) => ({
+          ...prev,
+          name: receiverName,
+          phone: (info.phone || "").toString(),
+        }));
+
+        // Delivery address from API
+        const line2 = [info.address2, info.address3]
+          .map((x) => (x || "").toString().trim())
+          .filter(Boolean)
+          .join(", ");
+
+        setDelivery({
+          name,
+          phone: (info.phone || "").toString(),
+          line1: (info.address1 || "").toString(),
+          line2,
+          postcode: (info.postcode || "").toString(),
+          city: (info.city || "").toString(),
+          state: (info.state || "").toString(),
+          country: (info.country || "").toString(),
+          note: "",
+        });
+      } catch (e) {
+        console.log("Failed to load me info:", e);
+        setMeInfo(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMeInfo();
+  }, []);
+
 
   const shipText = useMemo(() => formatAddr(shipping), [shipping]);
   const deliveryText = useMemo(() => formatAddr(delivery), [delivery]);
@@ -98,6 +199,8 @@ export default function MeProfileScreen() {
   const [addrModalOpen, setAddrModalOpen] = useState(false);
   const [addrMode, setAddrMode] = useState<"shipping" | "delivery">("shipping");
   const [addrDraft, setAddrDraft] = useState<Addr>({});
+
+
 
   const handleBack = () => {
     if (backTo) router.replace(backTo as any);
@@ -180,13 +283,17 @@ export default function MeProfileScreen() {
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardTitle}>{t("me_profile_title")}</Text>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <CustomButton
+              preset="approve"
+              icon={Save}
+              iconPosition="left"
+              iconSize={14}
               onPress={saveProfile}
-              style={styles.headerIconBtn}
+              style={styles.headerSaveBtn}
             >
-              <Ionicons name="save-outline" size={18} />
-            </TouchableOpacity>
+              {t("common_save") || "Save"}
+            </CustomButton>
+
           </View>
 
           {/* ✅ only this scrolls */}
@@ -447,7 +554,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 14,
     paddingBottom: 0,
-    fontSize: 13,
+    fontSize: 15,
     fontFamily: "Karla-ExtraBold",
     color: "#111827",
     borderBottomWidth: 1,
@@ -461,7 +568,7 @@ const styles = StyleSheet.create({
 
   fieldBlock: { marginBottom: 12 },
   label: {
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     color: "#4b5563",
     marginBottom: 4,
@@ -472,7 +579,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Karla-Regular",
     backgroundColor: "#f9fafb",
   },
@@ -480,7 +587,7 @@ const styles = StyleSheet.create({
   sectionMiniTitle: {
     marginTop: 2,
     marginBottom: 8,
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "Karla-ExtraBold",
     color: "#111827",
     textTransform: "uppercase",
@@ -508,7 +615,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   addrTitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     color: "#111827",
   },
@@ -525,7 +632,7 @@ const styles = StyleSheet.create({
   },
   addrHint: {
     marginTop: 6,
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: MUTED,
   },
@@ -538,7 +645,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   addrText: {
-    fontSize: 12.5,
+    fontSize: 14,
     fontFamily: "Karla-Regular",
     color: "#111827",
     lineHeight: 18,
@@ -548,7 +655,7 @@ const styles = StyleSheet.create({
   modalLabel: {
     marginTop: 10,
     marginBottom: 4,
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     color: "#4b5563",
   },
@@ -558,7 +665,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Karla-Regular",
     backgroundColor: "#f9fafb",
   },
@@ -583,5 +690,13 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
 
+  headerSaveBtn: {
+    minWidth: 90,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    marginRight: 15,
+    marginTop: 10,
+  },
 
 });

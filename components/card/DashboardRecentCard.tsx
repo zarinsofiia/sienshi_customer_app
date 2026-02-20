@@ -1,13 +1,13 @@
 // components/card/DashboardRecentCard.tsx
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
+    StyleProp,
+    StyleSheet,
+    Text,
+    View,
+    ViewStyle,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import ListingCard from "./ListingCard";
 
 const ORANGE = "#f59e0b";
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   tracking: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: "#ffffff",
     marginBottom: 4,

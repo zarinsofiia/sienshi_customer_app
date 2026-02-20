@@ -1,5 +1,4 @@
 // locales/zh.ts
-
 const zh = {
   /* =========================================================================
    * LOGIN
@@ -100,8 +99,8 @@ const zh = {
   register_msic_label: "MSIC 代码",
   register_msic_placeholder: "请输入 MSIC 代码",
 
-  register_business_activity_label: "主要营业活动",
-  register_business_activity_placeholder: "请输入主要营业活动描述",
+  register_business_activity_label: "主要营业活动说明",
+  register_business_activity_placeholder: "请描述主要营业活动",
 
   /* =========================================================================
    * REGISTER – PERSONAL DETAILS
@@ -237,9 +236,11 @@ const zh = {
   settings_lang_set_en: "语言已切换为英文",
   settings_lang_set_zh: "语言已切换为中文",
   settings_lang_change_failed: "语言切换失败",
+  common_ok: "确定",
 
-  common_ok: "OK",
-
+  /* =========================================================================
+   * DASHBOARD
+   * ========================================================================= */
   dashboard_welcome_title: "欢迎，{name}！",
   dashboard_guest: "访客",
   dashboard_welcome_subtitle: "追踪您的包裹",
@@ -251,132 +252,231 @@ const zh = {
   dashboard_announcement: "公告",
   dashboard_no_announcement_title: "暂无公告",
   dashboard_no_announcement_sub: "我们的最新通知会显示在这里。",
+
   dashboard_search_placeholder: "输入追踪号码",
   dashboard_calculator: "计算器",
 
-  // tracking page
-tracking_title: "追踪",
-tracking_subtitle: "追踪您的包裹",
-tracking_search_placeholder: "搜索",
-tracking_no_parcels: "暂无包裹",
-tracking_login_prompt: "登录以查看所有包裹",
-tracking_login_button: "登录",
-tracking_loading: "加载中...",
-tracking_searching: "搜索中",
-tracking_search_result: "搜索结果",
+  // Payment Part (from en)
+  dashboard_payment: "付款",
 
-// shipment
-shipment_title: "货件",
-shipment_subtitle: "查看您的所有包裹",
-shipment_search_placeholder: "搜索",
-shipment_searching: "搜索中...",
-shipment_search_result: "搜索结果",
-shipment_loading: "加载中...",
-shipment_login_prompt: "登录以查看所有包裹",
-shipment_no_parcels: "暂无包裹",
-shipment_login_button: "登录",
-shipment_total_weight: "总重量 (kg)",
-shipment_volume: "体积 (m³)",
+  /* =========================================================================
+   * TRACKING
+   * ========================================================================= */
+  tracking_title: "追踪",
+  tracking_subtitle: "追踪您的包裹",
+  tracking_search_placeholder: "搜索",
+  tracking_no_parcels: "暂无包裹",
+  tracking_login_prompt: "登录以查看所有包裹",
+  tracking_login_button: "登录",
+  tracking_loading: "加载中...",
+  tracking_searching: "搜索中",
+  tracking_search_result: "搜索结果",
 
+  /* =========================================================================
+   * SHIPMENT
+   * ========================================================================= */
+  shipment_title: "货件",
+  shipment_subtitle: "查看您的所有包裹",
+  shipment_search_placeholder: "搜索",
+  shipment_searching: "搜索中...",
+  shipment_search_result: "搜索结果",
+  shipment_loading: "加载中...",
+  shipment_login_prompt: "登录以查看所有包裹",
+  shipment_no_parcels: "暂无包裹",
+  shipment_login_button: "登录",
+  shipment_total_weight: "总重量 (kg)",
+  shipment_volume: "体积 (m³) ",
 
-// detail page
-header_tracking_detail: "追踪详情",
-td_tracking_id: "追踪单号",
-td_current_status: "当前状态",
-td_last_update: "最后更新",
-td_title: "追踪包裹",
-td_loading: "加载中",
-td_no_timeline: "暂无轨迹记录",
-td_remarks: "备注",
-
+  /* =========================================================================
+   * TRACKING DETAIL
+   * ========================================================================= */
+  header_tracking_detail: "追踪详情",
+  td_tracking_id: "追踪单号",
+  td_current_status: "当前状态",
+  td_last_update: "最后更新",
+  td_title: "追踪包裹",
+  td_loading: "加载中",
+  td_no_timeline: "暂无轨迹记录",
+  td_remarks: "备注",
 
   tracking_status_cn_warehouse: "包裹已到达中国仓库",
-tracking_status_on_declaration: "报关处理中",
-tracking_status_in_shipment: "运输中",
-tracking_status_container_packed: "已装柜",
-tracking_status_arrived_at_port: "已到港",
-tracking_status_my_customs_inspection_kch: "古晋查验中",
-tracking_status_customs_clearance_in_progress: "清关处理中",
-tracking_status_kch_custom: "古晋海关",
-tracking_status_kch_warehouse: "已到达古晋仓库",
-tracking_status_out_for_delivery: "派送中",
-tracking_status_delivered: "已签收",
-tracking_status_cn_customs_clearance: "中国清关中",
-tracking_status_cn_customs_inspection: "中国查验中",
+  tracking_status_on_declaration: "报关处理中",
+  tracking_status_in_shipment: "运输中",
+  tracking_status_container_packed: "已装柜",
+  tracking_status_arrived_at_port: "已到港",
+  tracking_status_my_customs_inspection_kch: "古晋查验中",
+  tracking_status_customs_clearance_in_progress: "清关处理中",
+  tracking_status_kch_custom: "古晋海关",
+  tracking_status_kch_warehouse: "已到达古晋仓库",
+  tracking_status_out_for_delivery: "派送中",
+  tracking_status_delivered: "已签收",
+  tracking_status_cn_customs_clearance: "中国清关中",
+  tracking_status_cn_customs_inspection: "中国查验中",
 
-//calculate
-calc_title: "包裹计算器",
-calc_subtitle: "请输入尺寸（cm）与重量（kg）。系统将自动计算体积（m³）。",
-calc_length: "长度（cm）",
-calc_width: "宽度（cm）",
-calc_height: "高度（cm）",
-calc_volume: "体积（m³）",
-calc_weight: "重量（kg）",
-calc_calculate_button: "计算",
-calc_reset_button: "重置",
-calc_result_section: "结果",
-calc_total_price: "总价格",
-calc_ok_label: "确定",
+  /* =========================================================================
+   * CALCULATOR
+   * ========================================================================= */
+  calc_title: "包裹计算器",
+  calc_subtitle: "请输入尺寸（cm）与重量（kg）。系统将自动计算体积（m³）。",
+  calc_length: "长度（cm）",
+  calc_width: "宽度（cm）",
+  calc_height: "高度（cm）",
+  calc_volume: "体积（m³）",
+  calc_weight: "重量（kg）",
+  calc_calculate_button: "计算",
+  calc_reset_button: "重置",
+  calc_result_section: "结果",
+  calc_total_price: "总价格",
+  calc_ok_label: "确定",
 
-//shipment detail page
-sd_tracking_id: "运单号",
+  /* =========================================================================
+   * SHIPMENT DETAIL
+   * ========================================================================= */
+  sd_tracking_id: "运单号",
+  sd_current_status: "当前状态",
+  sd_loading: "加载中",
+  sd_no_timeline: "暂无轨迹记录",
+  sd_remarks: "备注",
 
-//shipment detail
-//announcement
-announcement_loading: "加载中",
-announcement_not_found: "找不到公告",
-announcement_try_again: "请稍后再试",
+  /* =========================================================================
+   * ANNOUNCEMENT
+   * ========================================================================= */
+  announcement_loading: "加载中",
+  announcement_not_found: "找不到公告",
+  announcement_try_again: "请稍后再试",
 
-// me (zh)
-me_delivery_address: "收货地址",
-copy: "复制",
-ok: "确定",
-me_no_address_title: "暂无地址",
-me_delivery_address_empty: "收货地址为空",
-me_copied: "已复制",
-me_copied_message: "收货地址已复制到剪贴板",
-me_error: "错误",
-me_error_message: "复制地址失败",
-me_qr_login_required: "登录后才能查看二维码",
-me_qr_login_message: "请先登录以查看您的二维码。",
-me_my_qr: "我的二维码",
-me_qr_close: "关闭",
-me_saved: "已保存",
-me_profile_saved_message: "资料已保存",
-me_updated: "已更新",
-me_address_updated: "地址已更新",
-me_profile_title: "个人资料",
-me_full_name: "姓名",
-me_full_name_placeholder: "请输入姓名",
-me_email: "邮箱",
-me_email_placeholder: "请输入邮箱地址",
-me_phone: "电话",
-me_phone_placeholder: "请输入电话号码",
-me_addresses: "地址",
-me_shipping_address: "集运仓地址（提供给卖家）",
-me_delivery_address_home: "收货地址（您的住址）",
-me_edit_shipping_address: "编辑集运仓地址",
-me_edit_delivery_address: "编辑收货地址",
-me_save: "保存",
-me_cancel: "取消",
-me_receiver_name: "收件人姓名",
-me_receiver_name_placeholder: "请输入收件人姓名",
-me_address_line_1: "地址（第一行）",
-me_address_line_1_placeholder: "请输入地址",
-me_address_line_2: "地址（第二行）",
-me_address_line_2_placeholder: "请输入地址",
-me_postcode: "邮编",
-me_city: "城市",
-me_city_placeholder: "例如：古晋",
-me_state: "州属",
-me_state_placeholder: "例如：砂拉越",
-me_country: "国家",
-me_country_placeholder: "例如：马来西亚",
-me_note: "备注（选填）",
-me_note_placeholder: "选填",
+  /* =========================================================================
+   * ME (PROFILE / ADDRESS / QR)
+   * ========================================================================= */
+  me_delivery_address: "收货地址",
+  copy: "复制",
+  ok: "确定",
+  me_no_address_title: "暂无地址",
+  me_delivery_address_empty: "收货地址为空",
+  me_copied: "已复制",
+  me_copied_message: "收货地址已复制到剪贴板",
+  me_error: "错误",
+  me_error_message: "复制地址失败",
+  me_qr_login_required: "登录后才能查看二维码",
+  me_qr_login_message: "请先登录以查看您的二维码。",
+  me_my_qr: "我的二维码",
+  me_qr_close: "关闭",
+  me_saved: "已保存",
+  me_profile_saved_message: "资料已保存",
+  me_updated: "已更新",
+  me_address_updated: "地址已更新",
+  me_profile_title: "个人资料",
+  me_full_name: "姓名",
+  me_full_name_placeholder: "请输入姓名",
+  me_email: "邮箱",
+  me_email_placeholder: "请输入邮箱地址",
+  me_phone: "电话",
+  me_phone_placeholder: "请输入电话号码",
+  me_addresses: "地址",
+  me_shipping_address: "集运仓地址（提供给卖家）",
+  me_delivery_address_home: "收货地址（您的住址）",
+  me_edit_shipping_address: "编辑集运仓地址",
+  me_edit_delivery_address: "编辑收货地址",
+  me_save: "保存",
+  me_cancel: "取消",
+  me_receiver_name: "收件人姓名",
+  me_receiver_name_placeholder: "请输入收件人姓名",
+  me_address_line_1: "地址（第一行）",
+  me_address_line_1_placeholder: "请输入地址",
+  me_address_line_2: "地址（第二行）",
+  me_address_line_2_placeholder: "请输入地址",
+  me_postcode: "邮编",
+  me_city: "城市",
+  me_city_placeholder: "例如：古晋",
+  me_state: "州属",
+  me_state_placeholder: "例如：砂拉越",
+  me_country: "国家",
+  me_country_placeholder: "例如：马来西亚",
+  me_note: "备注（选填）",
+  me_note_placeholder: "选填",
+
+  /* =========================================================================
+   * PAYMENT
+   * ========================================================================= */
+  header_payment: "付款",
+  payment_title: "付款",
+  payment_search_placeholder: "按参考号 / 方式 / 状态搜索…",
+  payment_empty: "暂无付款记录",
+  payment_method: "付款方式",
+  payment_refno: "参考号",
+  payment_date: "日期",
+  common_load_more: "加载更多",
+  payment_filter_status: "状态",
+  payment_filter_method: "方式",
+  common_search: "搜索...",
+
+  // add payment
+  common_saved: "已保存",
+  common_error: "错误",
+  payment_received_pick_failed: "选择收据文件失败。",
+  payment_amount_required: "请输入有效金额",
+  payment_method_required: "请选择付款方式",
+  payment_ref_required: "请输入参考号。",
+  payment_date_required: "请输入日期",
+  payment_receipt_required: "请上传收据。",
+  payment_add_title: "新增付款",
+  payment_add_subtitle: "提交付款凭证以供审核",
+  payment_details: "付款详情",
+  common_save: "保存",
+  payment_amount: "金额",
+  payment_reference_placeholder: "交易号 / 银行参考号 / 收据号",
+
+  payment_upload_receipt: "上传收据",
+  payment_tap_to_upload: "点击上传收据",
+  payment_upload_hint: "支持 JPG/PNG/PDF",
+  common_change: "更换",
+  common_remove: "移除",
+
+  // detail
+  payment_detail_title: "付款明细",
+  payment_detail: "付款明细",
+  common_edit: "编辑",
+  payment_not_found: "未找到付款记录",
+  common_back: "返回",
+  common_try_again: "出现错误，请重试。",
+
+  // ✅ missing in your zh (but exists in en)
+  payment_remark: "备注",
+  payment_remark_placeholder: "请输入备注",
+
+  // ✅ missing in your zh (but exists in en)
+  saving: "保存中",
+  tracking_get_started: "开始",
+  tracking_welcome_title: "轻松追踪您的包裹",
+  tracking_welcome_subtitle: "在上方输入追踪号码即可查看最新动态。",
+  tracking_paste: "粘贴",
+  tracking_search: "搜索",
+  tracking_clear: "清除",
+  tracking_recent: "最近",
+  tracking_clear_recent: "清除",
+  tracking_show_less: "收起",
+  tracking_show_more: "更多",
+  forgot_title: "忘记密码",
+  forgot_subtitle: "请输入用户名或邮箱，我们将发送重置说明。",
+  forgot_username_email_label: "用户名/邮箱",
+  forgot_username_email_placeholder: "请输入用户名或邮箱",
+  forgot_back_to_login: "返回กลับไปหน้าเข้าสู่ระบบ", // if you want pure zh only, use the line below instead
+  // forgot_back_to_login: "返回登录",
+  forgot_submit_button: "发送重置链接",
+  forgot_success: "重置说明已发送",
+  forgot_error: "请求失败",
+  common_success: "成功",
+  forgot_missing_fields: "请输入用户名或邮箱",
+
+  common_not_found: "未找到",
+  common_action_failed: "操作失败",
+  payment_attachment: "附件",
+  common_processing: "处理中",
+  common_close: "关闭",
+common_view: "查看",
+
 
 };
-
 
 export default zh;
 

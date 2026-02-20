@@ -1,22 +1,22 @@
 // app/(tabs)/me/settings.tsx  (Customer App)
 
+import MobileAlertDialog from "@/components/modal/MobileAlertDialog";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
+  ActivityIndicator,
+  ScrollView,
   StyleSheet,
   Switch,
+  Text,
   TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppHeader } from "../../../components/AppHeader";
-import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
+import ScreenHero from "../../../components/layout/ScreenHero";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import MobileAlertDialog from "@/components/modal/MobileAlertDialog";
 
 type DialogType = "success" | "error";
 
@@ -202,14 +202,14 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   rowTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     color: "#111827",
   },
   rowSubtitle: {
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "Karla-Regular",
-    color: "#6b7280",
+    color: "#2e2f31",
     marginTop: 2,
   },
 
@@ -234,9 +234,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff7ed",
   },
   langPillText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
-    color: "#6b7280",
+    color: "#2e2f31",
   },
   langPillTextActive: {
     color: ORANGE,

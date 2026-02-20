@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import CustomButton from "../button/CustomButton";
 import { Ionicons } from "@expo/vector-icons";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Props = {
     open: boolean;
@@ -28,7 +29,6 @@ type Props = {
     hideFooter?: boolean;
     footer?: React.ReactNode;
 };
-
 export default function MobileFormModal({
     open,
     title,
@@ -42,6 +42,7 @@ export default function MobileFormModal({
     footer
 }: Props) {
     if (!open) return null;
+const {t} = useLanguage();
 
     return (
         <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
@@ -79,7 +80,7 @@ export default function MobileFormModal({
                                     {onSubmit ? (
                                         <View style={styles.footerBtnWrap}>
                                             <CustomButton preset="print" onPress={onSubmit} disabled={loading}>
-                                                {loading ? "Saving..." : submitLabel}
+                                                {loading ? t("saving") : submitLabel}
                                             </CustomButton>
                                         </View>
                                     ) : null}

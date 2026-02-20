@@ -1,30 +1,29 @@
 // app/register.tsx
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Alert,
-  TextInput,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 
-import Input from "@/components/input/Input";
 import AsyncButton from "@/components/button/AsnycButton";
+import Input from "@/components/input/Input";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLanguage } from "../contexts/LanguageContext";
 import Toast from "react-native-toast-message";
+import { useLanguage } from "../contexts/LanguageContext";
 // 👇 import your MSIC JSON (update the path if needed)
+import DateTimePicker, {
+    DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import msicSubcategories from "../assets/MSICSubCategoryCodes.json";
 import { API_BASE_URL } from "../config/api";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 
 const ORANGE = "#f59e0b";
 const WHITE = "#ffffffff";
@@ -1693,7 +1692,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     fontWeight: "900",
     color: ORANGE,
@@ -1714,7 +1713,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 40,
-    fontSize: 12,
+    fontSize: 13,
     color: "#111827",
     marginLeft: 8,
   },
@@ -1759,7 +1758,7 @@ const styles = StyleSheet.create({
   registerButtonText: {
     color: "#ffffff",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 0.8,
   },
   loginRow: {
@@ -1769,11 +1768,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#6b7280",
   },
   loginLink: {
-    fontSize: 12,
+    fontSize: 13,
     color: ORANGE,
     fontWeight: "700",
   },
@@ -1784,7 +1783,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   langText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#9ca3af",
     fontFamily: "Karla-ExtraBold",
   },
@@ -1793,7 +1792,7 @@ const styles = StyleSheet.create({
     fontFamily: "Karla-ExtraBold",
   },
   langSeparator: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#9ca3af",
     marginHorizontal: 6,
   },
@@ -1820,13 +1819,13 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   msicDescText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#4b5563",
     marginTop: 2,
   },
   passwordErrorText: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
     color: "#dc2626",
   },
 });

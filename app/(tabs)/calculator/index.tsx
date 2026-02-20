@@ -1,20 +1,19 @@
 // app/(tabs)/calculator/index.tsx
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppHeader } from "../../../components/AppHeader";
-import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
+import ScreenHero from "../../../components/layout/ScreenHero";
 import { useLanguage } from "../../../contexts/LanguageContext";
 
 import Input from "../../../components/input/Input";
@@ -53,6 +52,9 @@ function toNum(v: string) {
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+// round UP to 2dp (ceiling). Example: 0.08123 -> 0.09
+const ceil2 = (n: number) => Math.ceil(n * 100 - 1e-9) / 100;
+
 
 async function safeJson(res: Response) {
   const text = await res.text().catch(() => "");
@@ -135,7 +137,7 @@ export default function CalculatorScreen() {
     const w = Math.max(0, toNum(widthCm));
     const h = Math.max(0, toNum(heightCm));
     const vol = (l * w * h) / 1_000_000;
-    return round2(vol); // ✅ 2dp volume used everywhere
+    return ceil2(vol);
   }, [lengthCm, widthCm, heightCm]);
 
   const volumeText = useMemo(() => volumeM3.toFixed(2), [volumeM3]);
@@ -339,7 +341,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     marginTop: 6,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#fff7ed",
     textAlign: "center",
@@ -359,9 +361,9 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
-    color: "#9ca3af",
+    color: "#000000",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
@@ -393,14 +395,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   inputTextReadonly: {
-    color: "#6b7280",
+    color: "#2e2f31",
     fontFamily: "Karla-Medium",
     fontSize: 13,
   },
   inputLabel: {
-    color: "#6b7280",
+    color: "#2e2f31",
     fontFamily: "Karla-Bold",
-    fontSize: 11,
+    fontSize: 13,
   },
 
   actionRow: {
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   btnPrimaryText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: "#ffffff",
     letterSpacing: 0.5,
@@ -437,9 +439,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   btnGhostText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
-    color: "#6b7280",
+    color: "#2e2f31",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -451,13 +453,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   resultLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
-    color: "#6b7280",
+    color: "#2e2f31",
   },
   resultLabelStrong: { color: "#111827" },
   resultValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: "#111827",
   },
@@ -467,7 +469,7 @@ const styles = StyleSheet.create({
 
   note: {
     marginTop: 6,
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#9ca3af",
     lineHeight: 16,

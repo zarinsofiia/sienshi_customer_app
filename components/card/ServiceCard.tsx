@@ -1,18 +1,20 @@
 // components/card/ServiceCard.tsx
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  TouchableOpacity,
+  Image,
+  StyleProp,
   StyleSheet,
   Text,
-  StyleProp,
+  TouchableOpacity,
   ViewStyle,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-
+import type { ImageSourcePropType } from "react-native";
 const ORANGE = "#f59e0b";
 
 type ServiceCardProps = {
-  iconName: string;
+  iconName?: string;
+  iconPng?: ImageSourcePropType,
   label: string;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
@@ -20,6 +22,7 @@ type ServiceCardProps = {
 
 export default function ServiceCard({
   iconName,
+  iconPng,
   label,
   onPress,
   style,
@@ -30,7 +33,14 @@ export default function ServiceCard({
       onPress={onPress}
       activeOpacity={0.85}
     >
-      <Ionicons name={iconName as any} size={28} color={ORANGE} />
+
+      {iconPng ? (
+        <Image source={iconPng} style={styles.pngIcon} resizeMode="contain" />
+      ) : (
+        <Ionicons name={iconName as any} size={28} color={ORANGE} />
+      )}
+
+
       <Text style={styles.serviceLabel}>{label}</Text>
     </TouchableOpacity>
   );
@@ -46,14 +56,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F2C545",
     alignItems: "center",
-   
+
   },
   serviceLabel: {
     marginTop: 8,
-    fontSize: 12,
-    fontFamily: "Karla-Medium",
-    color: "#111827",
+    fontSize: 14,
+    fontFamily: "Karla-Bold",
+    color: "#E89923",
     textAlign: "center",
     textTransform: "uppercase",
+  },
+   pngIcon: {
+    width: 28,
+    height: 28,
   },
 });

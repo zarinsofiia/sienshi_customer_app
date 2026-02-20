@@ -85,9 +85,7 @@ export async function authedFetch(
   input: string,
   init: any = {}
 ): Promise<Response> {
-  const url = input.startsWith("http")
-    ? input
-    : `${API_BASE_URL}${input}`;
+  const url = input.startsWith("http") ? input : `${API_BASE_URL}${input}`;
 
   const token = await AsyncStorage.getItem("authToken");
 
@@ -95,9 +93,21 @@ export async function authedFetch(
     ...(init.headers || {}),
   };
 
-  // default Content-Type if not provided
-  if (!originalHeaders["Content-Type"]) {
-    originalHeaders["Content-Type"] = "application/json";
+  // ✅ Better FormData detection for React Native/Expo
+  const body = init?.body;
+  const isFormData =
+    !!body &&
+    typeof body === "object" &&
+    typeof (body as any).append === "function"; // FormData-like
+
+  // ✅ Do NOT force JSON content-type for FormData
+  if (isFormData) {
+    delete originalHeaders["Content-Type"];
+    delete originalHeaders["content-type"]; // ✅ add this
+  } else {
+    if (!originalHeaders["Content-Type"] && !originalHeaders["content-type"]) {
+      originalHeaders["Content-Type"] = "application/json";
+    }
   }
 
   // attach access token if we have one

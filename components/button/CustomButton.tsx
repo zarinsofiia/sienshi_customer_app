@@ -76,7 +76,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             style={[
                 {
                     paddingHorizontal: 16,
-                    paddingVertical: 6,
+                    paddingVertical: 8,
                     borderRadius: 999,
                     borderWidth: borderColor ? 1 : 0,
                     borderColor: borderColor,
@@ -86,7 +86,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             ]}
             textStyle={[
                 {
-                    fontSize: 12,
+                    fontSize: 13,
                     fontFamily: "Karla-Bold",
                 },
                 textStyle,

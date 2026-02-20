@@ -1,31 +1,31 @@
 // app/(tabs)/shipment/index.tsx
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { AppHeader } from "../../../components/AppHeader";
-import SearchBar from "../../../components/search/SearchBar";
-import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
-import { useLanguage } from "../../../contexts/LanguageContext";
+import ScreenHero from "../../../components/layout/ScreenHero";
+import SearchBar from "../../../components/search/SearchBar";
 import { authedFetch } from "../../../config/mobileApiClient";
+import { useLanguage } from "../../../contexts/LanguageContext";
 
 const ORANGE = "#f59e0b";
 
 // keep same look/feel as Dashboard page
 const APP_BG = "#f3f4f6";
 const BORDER = "#e5e7eb";
-const MUTED = "#6b7280";
+const MUTED = "#2e2f31";
 
 const LOGIN_BTN_BG = "#f59e0b";
 const LOGIN_TEXT = "#ffffffff";
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   countText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#fff7ed",
     textTransform: "uppercase",
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   statusText: {
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     textTransform: "uppercase",
   },
@@ -708,14 +708,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cityText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: ORANGE,
   },
   dateText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
-    color: "#9ca3af",
+    color: "#2e2f31",
   },
   dottedLine: {
     width: 1,
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadMoreText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: ORANGE,
     textTransform: "uppercase",
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
   },
   loadMoreSub: {
     marginTop: 4,
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: MUTED,
   },
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
   },
   centerText: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: MUTED,
     textAlign: "center",
@@ -789,14 +789,14 @@ const styles = StyleSheet.create({
   guestPillText: {
     flex: 1,
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#111827",
   },
   emptyPillText: {
     flex: 1,
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#111827",
   },
@@ -811,7 +811,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   loginChipText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: LOGIN_TEXT,
     textTransform: "uppercase",

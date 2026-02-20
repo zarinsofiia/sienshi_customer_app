@@ -1,18 +1,18 @@
 // app/(tabs)/tracking/detail.tsx
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppHeader } from "../../../components/AppHeader";
-import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
+import ScreenHero from "../../../components/layout/ScreenHero";
 import { authedFetch } from "../../../config/mobileApiClient";
 import { useLanguage } from "../../../contexts/LanguageContext";
 
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heroLabel: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#fef3c7",
     textTransform: "uppercase",
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   heroSmall: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#fff7ed",
   },
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#9ca3af",
     textTransform: "uppercase",
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   centerText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#6b7280",
     textAlign: "center",
@@ -488,14 +488,14 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   stepTime: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#9ca3af",
     marginTop: 2,
   },
   stepRemarks: {
     marginTop: 4,
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#111827",
   },

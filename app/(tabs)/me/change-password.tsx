@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   label: {
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     color: "#4b5563",
     marginBottom: 4,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Karla-Regular",
     backgroundColor: "#f9fafb",
   },
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   primaryButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     color: "#ffffff",
   },

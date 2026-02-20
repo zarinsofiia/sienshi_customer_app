@@ -1,28 +1,29 @@
 // app/(tabs)/dashboard/index.tsx
+import { authedFetch } from "@/config/mobileApiClient";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
   ActivityIndicator,
-  TouchableOpacity,
-  ImageBackground,
   FlatList,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
   useWindowDimensions,
+  View,
   ViewToken,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import ServiceCard from "../../../components/card/ServiceCard";
 import DashboardRecentCard from "../../../components/card/DashboardRecentCard";
-import SearchBar from "../../../components/search/SearchBar";
+import ServiceCard from "../../../components/card/ServiceCard";
 import ScreenHero from "../../../components/layout/ScreenHero";
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLanguage } from "../../../contexts/LanguageContext";
+import SearchBar from "../../../components/search/SearchBar";
 import { API_BASE_URL } from "../../../config/api";
-import { authedFetch } from "@/config/mobileApiClient";
+import { useLanguage } from "../../../contexts/LanguageContext";
+
 const ORANGE = "#f59e0b";
 const TITLE_ORANGE = "#E89923";
 const ANN_GAP = 12;
@@ -35,16 +36,21 @@ type Announcement = {
   imageUrl?: string;
 };
 
+// ✅ hardcode notifications for badge count (same as notifications page)
+type NotiKind = "info" | "success" | "warning" | "error";
+type NotiItem = { id: string; read: boolean; kind: NotiKind };
+
+const HARD_NOTIFICATIONS: NotiItem[] = [
+  { id: "n1", read: false, kind: "success" },
+  { id: "n2", read: false, kind: "info" },
+  { id: "n3", read: true, kind: "success" },
+  { id: "n4", read: true, kind: "warning" },
+];
 
 function normalizeImageUrl(url?: string | null) {
   const u = (url || "").trim();
   if (!u) return undefined;
-
-  // already absolute
   if (u.startsWith("http://") || u.startsWith("https://")) return u;
-
-  // relative path -> prefix base url
-  // ensure only single slash
   if (u.startsWith("/")) return `${API_BASE_URL}${u}`;
   return `${API_BASE_URL}/${u}`;
 }
@@ -96,6 +102,13 @@ export default function DashboardScreen() {
   // main has paddingHorizontal: 20, so available width = screenW - 40
   const ANN_CARD_W = screenW - 40;
   const ANN_SNAP = ANN_CARD_W + ANN_GAP;
+
+  // ✅ badge count (hardcoded for now)
+  const unreadCount = useMemo(
+    () => HARD_NOTIFICATIONS.filter((x) => !x.read).length,
+    []
+  );
+  const badgeText = unreadCount > 99 ? "99+" : String(unreadCount);
 
   // ✅ reliable index tracking for nested scroll (FlatList inside ScrollView)
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current;
@@ -190,8 +203,6 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
-      {/* ✅ AppHeader removed */}
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -209,10 +220,17 @@ export default function DashboardScreen() {
 
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push("/notification" as any)}
+              onPress={() => router.push("/notifications" as any)}
               style={styles.heroBellBtn}
             >
-              <Ionicons name="notifications-outline" size={20} color="#fff" />
+              <Ionicons name="notifications-outline" size={25} color="#fff" />
+
+              {/* ✅ unread badge */}
+              {unreadCount > 0 ? (
+                <View style={styles.badgeWrap} pointerEvents="none">
+                  <Text style={styles.badgeText}>{badgeText}</Text>
+                </View>
+              ) : null}
             </TouchableOpacity>
           </View>
 
@@ -263,22 +281,31 @@ export default function DashboardScreen() {
 
           <View style={styles.servicesRow}>
             <ServiceCard
-              iconName="cube-outline"
+              iconPng={require("../../../assets/icon/track.png")}
               label={t("dashboard_track_parcel") || "Track Parcel"}
               style={styles.serviceItem}
               onPress={() => router.push("/tracking")}
             />
             <ServiceCard
+              iconPng={require("../../../assets/icon/box.png")}
               iconName="albums-outline"
               label={t("dashboard_shipment_list") || "Shipment List"}
               style={styles.serviceItem}
               onPress={() => router.push("/shipment")}
             />
             <ServiceCard
+              iconPng={require("../../../assets/icon/budget.png")}
               iconName="calculator-outline"
               label={t("dashboard_calculator") || "Calculator"}
               style={styles.serviceItem}
               onPress={() => router.push("/calculator")}
+            />
+            <ServiceCard
+              iconPng={require("../../../assets/icon/payment.png")}
+              iconName="card-outline"
+              label={t("dashboard_payment") || "Payment"}
+              style={styles.serviceItem}
+              onPress={() => router.push("/payment")}
             />
           </View>
 
@@ -297,7 +324,7 @@ export default function DashboardScreen() {
           ) : announcements.length === 0 ? (
             <TouchableOpacity
               activeOpacity={0.9}
-              onPress={() => handleOpenAnnouncements()}
+              // onPress={() => handleOpenAnnouncements()}
               style={styles.announcementBanner}
             >
               <View style={styles.announcementIconWrap}>
@@ -349,14 +376,10 @@ export default function DashboardScreen() {
                     ]}
                   >
                     <ImageBackground
-                      source={{
-                        uri:
-                          item.imageUrl ,
-                      }}
+                      source={{ uri: item.imageUrl }}
                       style={styles.announcementImage}
                       imageStyle={styles.announcementImageStyle}
                     >
-                      
                       {announcements.length > 1 && (
                         <View style={styles.annCountPill}>
                           <Text style={styles.annCountText}>
@@ -399,15 +422,9 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#f3f4f6",
-  },
-  scrollContent: {
-    paddingBottom: 24,
-  },
+  safe: { flex: 1, backgroundColor: "#f3f4f6" },
+  scrollContent: { paddingBottom: 24 },
 
-  // ✅ hero header row (Dashboard + bell)
   heroHeaderRow: {
     paddingHorizontal: 16,
     flexDirection: "row",
@@ -432,6 +449,28 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.15)",
   },
 
+  // ✅ badge styles
+  badgeWrap: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 999,
+    backgroundColor: "#ef4444",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: ORANGE,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontFamily: "Karla-ExtraBold",
+    color: "#fff",
+    lineHeight: 12,
+  },
+
   heroTopRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -446,16 +485,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  locationText: {
-    fontSize: 11,
-    color: "#fef3c7",
-    fontFamily: "Karla-Medium",
-  },
+  locationText: { fontSize: 13, color: "#fef3c7", fontFamily: "Karla-Medium" },
 
-  welcomeBlock: {
-    marginTop: 14,
-    alignItems: "center",
-  },
+  welcomeBlock: { marginTop: 14, alignItems: "center" },
   welcomeTitle: {
     fontSize: 20,
     fontFamily: "Karla-ExtraBold",
@@ -471,17 +503,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // ✅ floating search bar (tuned)
   searchFloatingWrapper: {
-    marginTop: -22, // try -18 to -26 if you want higher/lower
+    marginTop: -22,
     paddingHorizontal: 20,
     alignItems: "center",
     zIndex: 2,
   },
-  dashboardSearchBar: {
-    borderRadius: 9999,
-    width: "85%",
-  },
+  dashboardSearchBar: { borderRadius: 9999, width: "85%" },
   dashboardSearchButton: {
     width: 40,
     height: 40,
@@ -490,10 +518,7 @@ const styles = StyleSheet.create({
     marginLeft: 0,
   },
 
-  main: {
-    marginTop: 24,
-    paddingHorizontal: 20,
-  },
+  main: { marginTop: 24, paddingHorizontal: 20 },
   sectionTitle: {
     fontSize: 13,
     fontFamily: "Karla-ExtraBold",
@@ -508,11 +533,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  serviceItem: {
-    flexBasis: "48%",
-    maxWidth: "48%",
-    marginBottom: 12,
-  },
+  serviceItem: { flexBasis: "48%", maxWidth: "48%", marginBottom: 12 },
 
   centerBox: {
     alignItems: "center",
@@ -521,7 +542,7 @@ const styles = StyleSheet.create({
   },
   centerText: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#6b7280",
   },
@@ -551,7 +572,7 @@ const styles = StyleSheet.create({
   },
   announcementEmptySub: {
     marginTop: 2,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#6b7280",
     lineHeight: 16,
@@ -565,15 +586,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e5e7eb",
   },
-  announcementImage: {
-    width: "100%",
-    height: 140,
-  },
-  announcementImageStyle: {
-    resizeMode: "cover",
-  },
+  announcementImage: { width: "100%", height: 140 },
+  announcementImageStyle: { resizeMode: "cover" },
 
-  // ✅ scalable indicator (works for many items)
   annCountPill: {
     position: "absolute",
     right: 10,
@@ -583,9 +598,5 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 999,
   },
-  annCountText: {
-    color: "#fff",
-    fontSize: 11,
-    fontFamily: "Karla-ExtraBold",
-  },
+  annCountText: { color: "#fff", fontSize: 13, fontFamily: "Karla-ExtraBold" },
 });

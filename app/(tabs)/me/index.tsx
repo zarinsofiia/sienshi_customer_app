@@ -1,32 +1,31 @@
 // app/(tabs)/me/index.tsx
 
+import MobileFormModal from "@/components/modal/MobileFormModal";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   ScrollView,
-  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { AppHeader } from "../../../components/AppHeader";
-import { useRouter } from "expo-router";
-import { useLanguage } from "../../../contexts/LanguageContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_BASE_URL } from "../../../config/api";
-import { authedFetch } from "../../../config/mobileApiClient";
-import ScreenHero from "../../../components/layout/ScreenHero";
+import CustomButton from "../../../components/button/CustomButton";
 import SectionCard from "../../../components/card/SectionCard";
-import * as Clipboard from "expo-clipboard";
+import ScreenHero from "../../../components/layout/ScreenHero";
 import MobileAlertDialog, {
   BasicMobileDialogState,
 } from "../../../components/modal/MobileAlertDialog";
-import QRCode from "react-native-qrcode-svg";
-import CustomButton from "../../../components/button/CustomButton";
-import MobileFormModal from "@/components/modal/MobileFormModal";
+import { API_BASE_URL } from "../../../config/api";
+import { authedFetch } from "../../../config/mobileApiClient";
+import { useLanguage } from "../../../contexts/LanguageContext";
 
 
 const ORANGE = "#f59e0b";
@@ -37,15 +36,29 @@ const MUTED = "#6b7280";
 const LOGIN_BTN_BG = "#f59e0b";
 const LOGIN_TEXT = "#ffffffff";
 
-const MOCK_USER = {
-  name: "ADMIN",
-  email: "admin@gmail.com",
-  phone: "0123456789",
+type MeInfo = {
+  name: string;
+  email: string;
+  username: string;
+  tin_no: string | null;
+  phone: string;
+  brn_new: string | null;
+  brn_old: string | null;
+  sst_number: string | null;
+  pic: string | null;
+  msic: string | null;
+  msic_desc: string | null;
+  einv_start_date: string | null;
+  address1: string;
+  address2: string;
+  address3: string;
+  postcode: string;
+  state: string;
+  city: string;
+  country: string;
+  cust_code: string;
 };
 
-// ✅ hardcode for now (later load from API / AsyncStorage)
-const MOCK_DELIVERY_ADDRESS =
-  "No. 12, Jalan Green Heights, Taman Green, 93350 Kuching, Sarawak, Malaysia";
 
 export default function MeScreen() {
   const router = useRouter();
@@ -62,44 +75,91 @@ export default function MeScreen() {
 
   const [addressModalOpen, setAddressModalOpen] = useState(false);
 
-  const user = MOCK_USER; // later: replace with real API data
+  const [meInfo, setMeInfo] = useState<MeInfo | null>(null);
+
+
 
   const deliveryAddressText = useMemo(() => {
-    return (MOCK_DELIVERY_ADDRESS || "").trim();
-  }, []);
+    if (!meInfo) return "";
+
+    const lines = [meInfo.address1, meInfo.address2, meInfo.address3]
+      .map((x) => (x || "").toString().trim())
+      .filter(Boolean);
+
+    const tailParts = [meInfo.postcode, meInfo.city, meInfo.state, meInfo.country]
+      .map((x) => (x || "").toString().trim())
+      .filter(Boolean);
+
+    const tail = tailParts.join(" ");
+    if (tail) lines.push(tail);
+
+    return lines.join(", ");
+  }, [meInfo]);
+
+
+  const qrValue = useMemo(() => {
+    return (meInfo?.cust_code || "").toString().trim();
+  }, [meInfo]);
 
   const [qrOpen, setQrOpen] = useState(false);
   const [displayName, setDisplayName] = useState(""); // use username for now
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadMeInfo = async () => {
       try {
         setAuthLoading(true);
 
-        const json = await AsyncStorage.getItem("currentUser");
-        if (!json) {
+        // if no token -> treat as guest (avoid calling API)
+        const token = await AsyncStorage.getItem("authToken");
+        if (!token) {
           setIsLoggedIn(false);
+          setMeInfo(null);
           setDisplayName("");
           return;
         }
 
-        const u = JSON.parse(json);
+        const res = await authedFetch(`${API_BASE_URL}/api/cust_app/me/info`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
 
+        const text = await res.text().catch(() => "");
+        let data: any = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch {
+          data = null;
+        }
+
+        if (!res.ok || !data) {
+          console.log("me/info error:", res.status, text);
+          setIsLoggedIn(false);
+          setMeInfo(null);
+          setDisplayName("");
+          return;
+        }
+
+        const info = data as MeInfo;
+
+        setMeInfo(info);
         setIsLoggedIn(true);
 
-        const name = (u?.username || "").toString().trim();
+        // keep displayName = username (for display)
+        const name = (info?.username || "").toString().trim();
         setDisplayName(name || "");
       } catch (e) {
-        console.log("Failed to load currentUser:", e);
+        console.log("Failed to load me info:", e);
         setIsLoggedIn(false);
+        setMeInfo(null);
         setDisplayName("");
       } finally {
         setAuthLoading(false);
       }
     };
 
-    loadUser();
+    loadMeInfo();
   }, []);
+
 
 
 
@@ -131,6 +191,10 @@ export default function MeScreen() {
       } catch (e) {
         console.log("Failed clearing storage on logout:", e);
       }
+
+      setIsLoggedIn(false);
+      setMeInfo(null);
+      setDisplayName("");
 
       setLoggingOut(false);
       router.replace("/login" as any);
@@ -215,7 +279,7 @@ export default function MeScreen() {
               setQrOpen(true);
             }}
           >
-            <Ionicons name="qr-code-outline" size={20} color="#ffffff" />
+            <Ionicons name="qr-code-outline" size={24} color="#ffffff" />
           </TouchableOpacity>
         }
       />
@@ -252,8 +316,9 @@ export default function MeScreen() {
                   {(displayName || (t("dashboard_guest") as any) || "Guest").toString().toUpperCase()}
                 </Text>
                 <Text style={styles.profileMeta}>
-                  {user.email} · {user.phone}
+                  {(meInfo?.email || "-")} · {(meInfo?.phone || "-")}
                 </Text>
+
               </>
             )}
           </View>
@@ -492,12 +557,13 @@ export default function MeScreen() {
         cancelLabel={(t("me_qr_close") as any) || "Close"}
       >
         <Text style={styles.qrSub}>
-          {displayName ? `Username: ${displayName}` : "No user found"}
+          {qrValue ? `Customer Code: ${qrValue}` : "No customer code"}
         </Text>
 
         <View style={styles.qrBox}>
-          <QRCode value={displayName || "GUEST"} size={220} />
+          <QRCode value={qrValue || "GUEST"} size={220} />
         </View>
+
       </MobileFormModal>
 
 
@@ -534,7 +600,7 @@ const styles = StyleSheet.create({
   },
   profileMeta: {
     marginTop: 2,
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#fef3c7",
     textAlign: "center",
@@ -557,7 +623,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   heroAddrLabel: {
-    fontSize: 10.5,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: "rgba(255,255,255,0.92)",
     letterSpacing: 0.5,
@@ -565,7 +631,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   heroAddrText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#fef3c7",
     lineHeight: 16,
@@ -636,7 +702,7 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   rowSubtitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: MUTED,
     marginTop: 2,
@@ -648,7 +714,7 @@ const styles = StyleSheet.create({
     backgroundColor: ORANGE,
   },
   editPillText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#ffffff",
   },
@@ -670,7 +736,7 @@ const styles = StyleSheet.create({
   },
   centerText: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: MUTED,
   },
@@ -696,7 +762,7 @@ const styles = StyleSheet.create({
   guestPillText: {
     flex: 1,
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#111827",
   },
@@ -710,7 +776,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   loginChipText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: LOGIN_TEXT,
     textTransform: "uppercase",
@@ -775,7 +841,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   addrModalCopyText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#ffffff",
   },
@@ -786,7 +852,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
   },
   addrModalOkText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#111827",
   }, qrBackdrop: {
@@ -812,7 +878,7 @@ const styles = StyleSheet.create({
   },
   qrSub: {
     marginTop: 6,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#6b7280",
     textAlign: "center",

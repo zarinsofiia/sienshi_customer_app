@@ -11,7 +11,7 @@ import {
 } from "@expo-google-fonts/karla";
 import { LanguageProvider } from "../contexts/LanguageContext";
 import Toast from "react-native-toast-message";
-
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 // ✅ add this
 import * as Notifications from "expo-notifications";
 
@@ -61,13 +61,18 @@ export default function RootLayout() {
   }
 
   return (
-    <LanguageProvider>
-      <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-      <Toast />
-    </LanguageProvider>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <LanguageProvider>
+        <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+          <Stack.Screen name="index" />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+        <Toast />
+      </LanguageProvider>
+
+
+
+    </GestureHandlerRootView>
   );
 }

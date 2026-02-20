@@ -1,6 +1,6 @@
 // app/components/ui/PageHeader.tsx
 import React, { ReactNode } from "react";
-import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ORANGE = "#f59e0b";
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
     color: "#fef3c7",
   },
 });

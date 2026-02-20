@@ -1,28 +1,29 @@
 // app/(tabs)/tracking/index.tsx
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
 
 import { AppHeader } from "../../../components/AppHeader";
-import SearchBar from "../../../components/search/SearchBar";
-import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
-import { useLanguage } from "../../../contexts/LanguageContext";
+import ScreenHero from "../../../components/layout/ScreenHero";
+import SearchBar from "../../../components/search/SearchBar";
 import { authedFetch } from "../../../config/mobileApiClient";
+import { useLanguage } from "../../../contexts/LanguageContext";
 
 const ORANGE = "#f59e0b";
 const APP_BG = "#f3f4f6";
 const BORDER = "#e5e7eb";
-const MUTED = "#6b7280";
+const MUTED = "#2e2f31";
 
 type ParcelSearchItem = {
   id: number;
@@ -51,17 +52,14 @@ type TrackingItem = {
   parcelId: number;
   trackingId: string;
 
-  // header pill
-  status: string; // latest status title (translated)
+  status: string;
   statusKey: string | null;
   statusBg: string;
   statusColor: string;
 
-  // top row = latest
-  fromCity: string; // latest status title (translated)
-  fromDate: string; // latest datetime formatted
+  fromCity: string;
+  fromDate: string;
 
-  // bottom row = previous
   toCity?: string;
   toDate?: string;
 };
@@ -124,7 +122,6 @@ function getStatusColors(statusRaw: string | null | undefined): {
   return { statusBg: "#f3f4f6", statusColor: "#6b7280" };
 }
 
-/** icon mapping (same as detail page) */
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 function getStatusIcon(status: string | null | undefined): IoniconName {
   const s = (status || "").toString().trim().toLowerCase();
@@ -161,11 +158,6 @@ async function safeJson(res: Response) {
   }
 }
 
-/**
- * Build 2 rows:
- * - Top row = latest timeline status + date
- * - Bottom row = previous distinct status + date (if exists)
- */
 function buildTrackingItemFromTimeline(
   parcelId: number,
   trackingNumber: string,
@@ -175,19 +167,14 @@ function buildTrackingItemFromTimeline(
 ): TrackingItem {
   const rows = Array.isArray(timeline) ? timeline : [];
 
-  // sort oldest -> newest (by datetime)
   const sorted = [...rows].sort((a, b) => {
     const ta = a?.datetime ? new Date(a.datetime).getTime() : 0;
     const tb = b?.datetime ? new Date(b.datetime).getTime() : 0;
     return ta - tb;
   });
 
-  // compress consecutive same statuses
-  const compressed: Array<{
-    status: string;
-    first: TimelineRow;
-    last: TimelineRow;
-  }> = [];
+  const compressed: Array<{ status: string; first: TimelineRow; last: TimelineRow }> =
+    [];
 
   for (const r of sorted) {
     const s = (r.tracking_status || "").toString().trim().toLowerCase();
@@ -205,7 +192,6 @@ function buildTrackingItemFromTimeline(
 
   const { statusBg, statusColor } = getStatusColors(latestStatusRaw);
 
-  // no timeline at all
   if (compressed.length === 0) {
     const title = latestStatusRaw ? statusTitle(latestStatusRaw).toUpperCase() : "-";
     return {
@@ -220,7 +206,6 @@ function buildTrackingItemFromTimeline(
     };
   }
 
-  // only 1 distinct status
   if (compressed.length === 1) {
     const latest = compressed[0];
     const title = statusTitle(latest.status).toUpperCase();
@@ -239,7 +224,6 @@ function buildTrackingItemFromTimeline(
     };
   }
 
-  // latest + previous
   const latest = compressed[compressed.length - 1];
   const prev = compressed[compressed.length - 2];
 
@@ -265,6 +249,44 @@ function buildTrackingItemFromTimeline(
   };
 }
 
+/* ---------- Recent searches (local) ---------- */
+const RECENT_KEY = "tracking_recent_ids_v1";
+const STORE_MAX_RECENT = 10;
+const SHOW_DEFAULT_RECENT = 5;
+
+async function loadRecent(): Promise<string[]> {
+  try {
+    const raw = await AsyncStorage.getItem(RECENT_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(Boolean).map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveRecent(next: string[]) {
+  try {
+    await AsyncStorage.setItem(
+      RECENT_KEY,
+      JSON.stringify(next.slice(0, STORE_MAX_RECENT))
+    );
+  } catch {}
+}
+
+function uniqNormalized(list: string[]) {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const x of list) {
+    const v = (x || "").trim();
+    if (!v) continue;
+    const k = v.toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(v);
+  }
+  return out;
+}
+
 export default function TrackingScreen() {
   const { t } = useLanguage();
   type TKey = Parameters<typeof t>[0];
@@ -277,6 +299,9 @@ export default function TrackingScreen() {
   const [searchList, setSearchList] = useState<TrackingItem[]>([]);
   const [searchedOnce, setSearchedOnce] = useState(false);
 
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [showAllRecents, setShowAllRecents] = useState(false);
+
   const statusTitle = (statusRaw: string) => {
     const status = (statusRaw || "").toString().trim().toLowerCase();
     if (!status) return "-";
@@ -284,12 +309,18 @@ export default function TrackingScreen() {
     const key = (`tracking_status_${status}` as unknown) as TKey;
     const translated = t(key);
 
-    // fallback when missing
     if (!translated || translated === (key as unknown as string)) {
       return prettifyStatus(status);
     }
     return translated;
   };
+
+  useEffect(() => {
+    void (async () => {
+      const r = await loadRecent();
+      setRecentIds(r);
+    })();
+  }, []);
 
   useEffect(() => {
     const id = (params?.trackingId || "").toString().trim();
@@ -301,6 +332,13 @@ export default function TrackingScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.trackingId]);
 
+  const shownRecents = useMemo(() => {
+    const list = Array.isArray(recentIds) ? recentIds : [];
+    return showAllRecents
+      ? list.slice(0, STORE_MAX_RECENT)
+      : list.slice(0, SHOW_DEFAULT_RECENT);
+  }, [recentIds, showAllRecents]);
+
   const doSearch = async (idRaw?: string) => {
     const id = (idRaw ?? trackingId).toString().trim();
     if (!id) return;
@@ -311,7 +349,6 @@ export default function TrackingScreen() {
       setSearchList([]);
       setSearchedOnce(true);
 
-      // 1) search parcels
       const res = await authedFetch("/api/cust_app/parcels/get_parcel_by_tracking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -323,7 +360,6 @@ export default function TrackingScreen() {
 
       const list: ParcelSearchItem[] = Array.isArray(parcels) ? parcels : [];
 
-      // 2) fetch timeline per parcel
       const items = await Promise.all(
         list.map(async (p) => {
           const trackingNo = (p.parcel_tracking || id).toString();
@@ -335,12 +371,10 @@ export default function TrackingScreen() {
             );
 
             const tlData = await safeJson(tlRes);
-
             const timeline: TimelineRow[] = Array.isArray(tlData?.timeline)
               ? tlData.timeline
               : [];
 
-            // note: tlData.parcel exists but we don't need it (we already have trackingNo)
             return buildTrackingItemFromTimeline(
               p.id,
               trackingNo,
@@ -361,6 +395,12 @@ export default function TrackingScreen() {
       );
 
       setSearchList(items);
+
+      setRecentIds((prev) => {
+        const nextRecent = uniqNormalized([id, ...(prev || [])]).slice(0, STORE_MAX_RECENT);
+        void saveRecent(nextRecent);
+        return nextRecent;
+      });
     } catch (e: unknown) {
       const msg = (e as any)?.message || "Failed to search tracking number.";
       setSearchError(msg);
@@ -370,9 +410,7 @@ export default function TrackingScreen() {
     }
   };
 
-  const handleSearch = () => {
-    void doSearch();
-  };
+  const handleSearch = () => void doSearch();
 
   const goToDetail = (item: TrackingItem) => {
     router.push({
@@ -380,7 +418,6 @@ export default function TrackingScreen() {
       params: {
         parcelId: String(item.parcelId),
         trackingId: item.trackingId,
-        // backTo: "/tracking",
       },
     } as any);
   };
@@ -390,6 +427,17 @@ export default function TrackingScreen() {
     const base = t("tracking_search_result") || "Search Results";
     return `${base} (${searchList.length})`;
   }, [searchedOnce, searchList.length, t]);
+
+  const tapRecent = (val: string) => {
+    setTrackingId(val);
+    void doSearch(val);
+  };
+
+  const clearRecent = async () => {
+    setRecentIds([]);
+    setShowAllRecents(false);
+    await AsyncStorage.removeItem(RECENT_KEY);
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -414,6 +462,12 @@ export default function TrackingScreen() {
             placeholder={t("tracking_search_placeholder")}
             leftIconName="cube-outline"
             onSearch={handleSearch}
+            onClear={() => {
+              setTrackingId("");
+              setSearchError(null);
+              setSearchList([]);
+              setSearchedOnce(false);
+            }}
           />
 
           {searching ? (
@@ -457,17 +511,10 @@ export default function TrackingScreen() {
                       <Text style={styles.trackingId} numberOfLines={1}>
                         {x.trackingId}
                       </Text>
-
-                      {/* <View style={[styles.statusPill, { backgroundColor: x.statusBg }]}>
-                        <Text style={[styles.statusText, { color: x.statusColor }]}>
-                          {x.status}
-                        </Text>
-                      </View> */}
                     </View>
 
                     <View style={styles.cardBodyRow}>
                       <View style={styles.locationsColumn}>
-                        {/* TOP: latest */}
                         <View style={styles.locationRow}>
                           <Ionicons
                             name="location-sharp"
@@ -481,11 +528,9 @@ export default function TrackingScreen() {
                           </View>
                         </View>
 
-                        {/* BOTTOM: previous */}
                         {x.toCity ? (
                           <>
                             <View style={styles.dottedLine} />
-
                             <View style={styles.locationRow}>
                               <Ionicons
                                 name="location-sharp"
@@ -503,11 +548,7 @@ export default function TrackingScreen() {
                       </View>
 
                       <View style={styles.illustration}>
-                        <Ionicons
-                          name={getStatusIcon(x.statusKey)}
-                          size={34}
-                          color={ORANGE}
-                        />
+                        <Ionicons name={getStatusIcon(x.statusKey)} size={34} color={ORANGE} />
                       </View>
                     </View>
                   </SectionCard>
@@ -515,7 +556,83 @@ export default function TrackingScreen() {
               ))}
             </View>
           ) : (
-            <View style={{ height: 6 }} />
+            <View style={{ marginBottom: 14 }}>
+              {/* ✅ Recent moved to TOP */}
+              {recentIds.length ? (
+                <View style={{ marginBottom: 14 }}>
+                  <View style={styles.recentHeader}>
+                    <Text style={styles.sectionTitle}>
+                      {t("tracking_recent") || "Recent"}
+                    </Text>
+
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                      {recentIds.length > SHOW_DEFAULT_RECENT ? (
+                        <TouchableOpacity
+                          onPress={() => setShowAllRecents((v) => !v)}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={styles.clearLink}>
+                            {showAllRecents
+                              ? (t("tracking_show_less") || "Less")
+                              : (t("tracking_show_more") || "More")}
+                          </Text>
+                        </TouchableOpacity>
+                      ) : null}
+
+                      <TouchableOpacity onPress={clearRecent} activeOpacity={0.8}>
+                        <Text style={styles.clearLink}>
+                          {t("tracking_clear_recent") || "Clear"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={styles.recentChipsWrap}>
+                    {shownRecents.map((rid) => (
+                      <TouchableOpacity
+                        key={rid}
+                        activeOpacity={0.9}
+                        onPress={() => tapRecent(rid)}
+                        style={styles.recentChip}
+                      >
+                        <Ionicons name="time-outline" size={14} color={ORANGE} />
+                        <Text
+                          style={styles.recentChipText}
+                          numberOfLines={1}
+                          ellipsizeMode="middle"
+                        >
+                          {rid}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              ) : null}
+
+              {/* ✅ Get Started as a “note guide” (NOT a card) */}
+              <Text style={styles.sectionTitle}>
+                {t("tracking_get_started") || "Get Started"}
+              </Text>
+
+              <View style={styles.noteGuide}>
+                <View style={styles.noteAccent} />
+                <Ionicons
+                  name="information-circle-outline"
+                  size={18}
+                  color={ORANGE}
+                  style={{ marginTop: 1 }}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.noteGuideTitle}>
+                    {t("tracking_welcome_title") || "Track your parcel easily"}
+                  </Text>
+                  <Text style={styles.noteGuideText}>
+                    {t("tracking_welcome_subtitle") ||
+                      "Enter a tracking number above to see the latest updates."}
+                  </Text>
+                </View>
+              </View>
+            </View>
           )}
         </ScrollView>
       </View>
@@ -524,53 +641,32 @@ export default function TrackingScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: APP_BG,
-  },
+  safe: { flex: 1, backgroundColor: APP_BG },
 
-  scrollContent: {
-    paddingBottom: 32,
-    paddingTop: 10,
-  },
+  scrollContent: { paddingBottom: 32, paddingTop: 10 },
 
-  hero: {
-    paddingBottom: 60,
-   
-  },
+  hero: { paddingBottom: 60 },
   heroContent: {},
 
-  searchWrapper: {
-    marginTop: 0,
-  },
+  searchWrapper: { marginTop: 0 },
   searchInfoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     marginTop: 10,
   },
-  searchHint: {
-    fontSize: 12,
-    fontFamily: "Karla-Medium",
-    color: MUTED,
-  },
+  searchHint: { fontSize: 13, fontFamily: "Karla-Medium", color: MUTED },
   searchError: {
     marginTop: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#dc2626",
   },
 
-  main: {
-    flex: 1,
-    // marginTop: -20,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    zIndex: 1,
-  },
+  main: { flex: 1, paddingHorizontal: 20, paddingBottom: 24, zIndex: 1 },
 
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: "#111827",
     marginBottom: 10,
@@ -578,9 +674,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
 
-  trackingCard: {
-    marginBottom: 12,
-  },
+  trackingCard: { marginBottom: 12 },
 
   cardHeaderRow: {
     flexDirection: "row",
@@ -589,7 +683,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // match your screenshot vibe
   trackingId: {
     flex: 1,
     paddingRight: 10,
@@ -598,43 +691,13 @@ const styles = StyleSheet.create({
     color: ORANGE,
   },
 
-  statusPill: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  statusText: {
-    fontSize: 10,
-    fontFamily: "Karla-Bold",
-    textTransform: "uppercase",
-  },
+  cardBodyRow: { flexDirection: "row", alignItems: "flex-start" },
+  locationsColumn: { flex: 1 },
+  locationRow: { flexDirection: "row", alignItems: "flex-start" },
+  locationTextBlock: { flex: 1 },
 
-  cardBodyRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  locationsColumn: {
-    flex: 1,
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  locationTextBlock: {
-    flex: 1,
-  },
-
-  // status label line (orange-ish like screenshot)
-  cityText: {
-    fontSize: 12,
-    fontFamily: "Karla-Bold",
-    color: ORANGE,
-  },
-  dateText: {
-    fontSize: 11,
-    fontFamily: "Karla-Regular",
-    color: "#9ca3af",
-  },
+  cityText: { fontSize: 13, fontFamily: "Karla-Bold", color: ORANGE },
+  dateText: { fontSize: 13, fontFamily: "Karla-Regular", color: "#2e2f31" },
 
   dottedLine: {
     width: 1,
@@ -646,11 +709,7 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
 
-  illustration: {
-    marginLeft: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  illustration: { marginLeft: 10, justifyContent: "center", alignItems: "center" },
 
   emptyPill: {
     width: "100%",
@@ -667,8 +726,74 @@ const styles = StyleSheet.create({
   emptyPillText: {
     flex: 1,
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Medium",
     color: "#111827",
+  },
+
+  /* ---- recents chips ---- */
+  recentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+
+  clearLink: { fontSize: 14, fontFamily: "Karla-Bold", color: ORANGE },
+
+  recentChipsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 2,
+  },
+
+  recentChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginRight: 8,
+    marginBottom: 8,
+    maxWidth: 240,
+  },
+
+  recentChipText: {
+    fontSize: 13,
+    fontFamily: "Karla-Bold",
+    color: "#111827",
+  },
+
+  /* ---- NOTE / GUIDE (not a box/card) ---- */
+  noteGuide: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    paddingVertical: 4,
+  },
+
+  noteAccent: {
+    width: 3,
+    borderRadius: 999,
+    backgroundColor: ORANGE,
+    alignSelf: "stretch",
+  },
+
+  noteGuideTitle: {
+    fontSize: 14,
+    fontFamily: "Karla-ExtraBold",
+    color: "#111827",
+    marginBottom: 2,
+  },
+
+  noteGuideText: {
+    fontSize: 13,
+    fontFamily: "Karla-Regular",
+    color: MUTED,
+    lineHeight: 18,
   },
 });

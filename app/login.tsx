@@ -1,26 +1,26 @@
 // app/login.tsx
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useLanguage } from "../contexts/LanguageContext";
-import Input from "@/components/input/Input";
 import AsyncButton from "@/components/button/AsnycButton";
-import { API_BASE_URL } from "../config/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import Input from "@/components/input/Input";
 import MobileAlertDialog, {
   BasicMobileDialogState,
 } from "@/components/modal/MobileAlertDialog";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { API_BASE_URL } from "../config/api";
+import { useLanguage } from "../contexts/LanguageContext";
 import { registerPushTokens } from "../hooks/registerPush";
 
 const ORANGE = "#f59e0b";
@@ -191,6 +191,7 @@ export default function LoginScreen() {
                     }
                     containerStyle={styles.inputWrapper}
                     inputStyle={styles.input}
+                    trimEnd
                   />
                 </View>
 
@@ -230,7 +231,9 @@ export default function LoginScreen() {
 
 
                 {/* Forgot password */}
-                <TouchableOpacity style={styles.forgotWrapper}>
+                <TouchableOpacity
+                  style={styles.forgotWrapper}
+                  onPress={() => router.push("/forgot-password")}                >
                   <Text style={styles.forgotText}>{t("login_forgot")}</Text>
                 </TouchableOpacity>
 
@@ -346,7 +349,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     fontWeight: "800",
     color: "#f59e0b",
@@ -366,7 +369,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 40,
-    fontSize: 12,
+    fontSize: 13,
     color: "#111827",
     marginLeft: 8,
   },
@@ -375,7 +378,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   forgotText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     fontWeight: "700",
     color: "#f59e0b",
@@ -390,7 +393,7 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: "#ffffff",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 0.8,
   },
   registerRow: {
@@ -400,11 +403,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   registerText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#6b7280",
   },
   registerLink: {
-    fontSize: 12,
+    fontSize: 13,
     color: ORANGE,
     fontWeight: "700",
   },
@@ -415,7 +418,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   langText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#9ca3af",
     fontFamily: "Karla-ExtraBold",
   },
@@ -424,7 +427,7 @@ const styles = StyleSheet.create({
     fontFamily: "Karla-ExtraBold",
   },
   langSeparator: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#9ca3af",
     marginHorizontal: 6,
   },

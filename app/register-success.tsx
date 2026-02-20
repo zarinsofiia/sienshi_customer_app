@@ -1,11 +1,11 @@
 // app/register-success.tsx
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import AsyncButton from "@/components/button/AsnycButton";
-import { useLanguage } from "../contexts/LanguageContext";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const ORANGE = "#f59e0b";
 const WHITE = "#ffffffff";
@@ -113,12 +113,12 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "#ffffff",
         fontWeight: "700",
-        fontSize: 12,
+        fontSize: 13,
         letterSpacing: 0.8,
     },
     emergencyText: {
         marginTop: 16,
-        fontSize: 12,
+        fontSize: 13,
         lineHeight: 18,
         color: "#9ca3af", // gray-400
         textAlign: "center",

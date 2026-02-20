@@ -1,17 +1,17 @@
 // app/(tabs)/parcel/detail.tsx
 
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppHeader } from "../../../components/AppHeader";
-import ScreenHero from "../../../components/layout/ScreenHero";
 import SectionCard from "../../../components/card/SectionCard";
+import ScreenHero from "../../../components/layout/ScreenHero";
 
 const ORANGE = "#f59e0b";
 
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#9ca3af",
     textTransform: "uppercase",
@@ -230,13 +230,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   infoLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
     flex: 0.4,
   },
   infoValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#111827",
     flex: 0.6,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#e5e7eb",
   },
   routeText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#374151",
   },

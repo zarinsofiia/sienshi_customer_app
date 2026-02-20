@@ -1,6 +1,6 @@
-// components/Input.tsx (React Native version - style fix)
-import { AlertCircle, CheckCircle } from 'lucide-react-native';
-import React, { forwardRef, useEffect, useState } from 'react';
+// components/Input.tsx (React Native) - updated to match your mobile style
+import { AlertCircle, CheckCircle } from "lucide-react-native";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import {
   StyleProp,
   StyleSheet,
@@ -10,7 +10,7 @@ import {
   TextStyle,
   View,
   ViewStyle,
-} from 'react-native';
+} from "react-native";
 
 interface ValidationRules {
   required?: boolean;
@@ -23,13 +23,10 @@ interface ValidationRules {
   custom?: (value: string) => string | null;
 }
 
-type UISize = 'sm' | 'md' | 'lg';
+type UISize = "sm" | "md" | "lg";
 
 interface InputProps
-  extends Omit<
-    TextInputProps,
-    'onChange' | 'onChangeText' | 'value' | 'style'
-  > {
+  extends Omit<TextInputProps, "onChange" | "onChangeText" | "value" | "style"> {
   label?: string;
   error?: string;
   helperText?: string;
@@ -41,14 +38,22 @@ interface InputProps
   onChangeText?: (text: string) => void;
   onValidationChange?: (isValid: boolean, error: string | null) => void;
   uiSize?: UISize;
+  trimEnd?: boolean;
+
 
   /** Style for the outer container (View) */
   containerStyle?: StyleProp<ViewStyle>;
   /** Style for the inner TextInput */
   inputStyle?: StyleProp<TextStyle>;
-
   labelStyle?: StyleProp<TextStyle>;
 }
+
+const BORDER = "#e5e7eb";
+const MUTED = "#6b7280";
+const TEXT = "#111827";
+const LABEL = "#4b5563";
+const BG = "#f9fafb";
+const ORANGE = "#f59e0b";
 
 const Input = forwardRef<TextInput, InputProps>(
   (
@@ -60,22 +65,25 @@ const Input = forwardRef<TextInput, InputProps>(
       rightIcon,
       validationRules,
       showValidation = true,
-      uiSize = 'md',
-      value = '',
+      uiSize = "md",
+      value = "",
       onChangeText,
       onValidationChange,
       containerStyle,
       inputStyle,
       labelStyle,
       onBlur,
+      onFocus,
       editable = true,
+      placeholderTextColor = "#9ca3af",
+      trimEnd = false,
       ...rest
     },
     ref
   ) => {
     const [internalError, setInternalError] = useState<string | null>(null);
     const [touched, setTouched] = useState(false);
-    const [isValid, setIsValid] = useState<boolean | null>(null);
+    const [focused, setFocused] = useState(false);
 
     const error = externalError || internalError;
     const showError = touched && !!error && showValidation;
@@ -86,9 +94,9 @@ const Input = forwardRef<TextInput, InputProps>(
       UISize,
       { paddingVertical: number; paddingHorizontal: number; fontSize: number }
     > = {
-      sm: { paddingVertical: 6, paddingHorizontal: 8, fontSize: 14 },
-      md: { paddingVertical: 8, paddingHorizontal: 12, fontSize: 16 },
-      lg: { paddingVertical: 10, paddingHorizontal: 14, fontSize: 18 },
+      sm: { paddingVertical: 8, paddingHorizontal: 10, fontSize: 13 },
+      md: { paddingVertical: 10, paddingHorizontal: 12, fontSize: 13 },
+      lg: { paddingVertical: 12, paddingHorizontal: 14, fontSize: 14 },
     };
 
     const validateValue = (inputValue: string): string | null => {
@@ -105,10 +113,10 @@ const Input = forwardRef<TextInput, InputProps>(
         custom,
       } = validationRules;
 
-      const trimmed = inputValue?.trim?.() ?? '';
+      const trimmed = inputValue?.trim?.() ?? "";
 
-      if (required && (!trimmed || trimmed === '')) {
-        return 'This field is required';
+      if (required && (!trimmed || trimmed === "")) {
+        return "This field is required";
       }
       if (!trimmed) return null;
 
@@ -116,7 +124,7 @@ const Input = forwardRef<TextInput, InputProps>(
         email &&
         !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(trimmed)
       ) {
-        return 'Please enter a valid email address';
+        return "Please enter a valid email address";
       }
       if (minLength && trimmed.length < minLength) {
         return `Must be at least ${minLength} characters long`;
@@ -125,7 +133,7 @@ const Input = forwardRef<TextInput, InputProps>(
         return `Must not exceed ${maxLength} characters`;
       }
       if (pattern && !pattern.test(trimmed)) {
-        return 'Invalid format';
+        return "Invalid format";
       }
 
       if (min !== undefined || max !== undefined) {
@@ -140,9 +148,7 @@ const Input = forwardRef<TextInput, InputProps>(
         }
       }
 
-      if (custom) {
-        return custom(trimmed);
-      }
+      if (custom) return custom(trimmed);
 
       return null;
     };
@@ -150,53 +156,48 @@ const Input = forwardRef<TextInput, InputProps>(
     useEffect(() => {
       if (!validationRules || !touched) return;
 
-      const validationError = validateValue(String(value ?? ''));
+      const validationError = validateValue(String(value ?? ""));
       setInternalError(validationError ?? null);
 
       const valid = !validationError;
-      setIsValid(valid);
-      if (onValidationChange) {
-        onValidationChange(valid, validationError);
-      }
+      onValidationChange?.(valid, validationError ?? null);
     }, [value, touched, validationRules, onValidationChange]);
-
-    const handleChangeText = (text: string) => {
-      onChangeText?.(text);
-    };
-
-    const handleBlur: TextInputProps['onBlur'] = (e) => {
-      setTouched(true);
-      onBlur?.(e);
-    };
-
 
     const getValidationIcon = () => {
       if (!showValidation || !validationRules) return null;
-      if (showError) {
-        return <AlertCircle size={18} color="#ef4444" />;
-      }
-      if (showSuccess) {
-        return <CheckCircle size={18} color="#22c55e" />;
-      }
+      if (showError) return <AlertCircle size={18} color="#ef4444" />;
+      if (showSuccess) return <CheckCircle size={18} color="#22c55e" />;
       return null;
     };
 
-    const borderColor = showError
-      ? '#fecaca'
-      : showSuccess
-        ? '#bbf7d0'
-        : '#4b5563';
+    const borderColor = useMemo(() => {
+      if (showError) return "#fecaca";
+      if (showSuccess) return "#bbf7d0";
+      if (focused) return ORANGE;
+      return BORDER;
+    }, [showError, showSuccess, focused]);
 
     const sizeStyles = sizeConfig[uiSize];
+
+    const handleBlur: TextInputProps["onBlur"] = (e) => {
+      setTouched(true);
+      setFocused(false);
+      onBlur?.(e);
+    };
+
+    const handleFocus: TextInputProps["onFocus"] = (e) => {
+      setFocused(true);
+      onFocus?.(e);
+    };
 
     return (
       <View style={styles.container}>
         {label ? (
           <Text style={[styles.label, labelStyle]}>
             {label}
-            {validationRules?.required && (
+            {validationRules?.required ? (
               <Text style={styles.requiredMark}> *</Text>
-            )}
+            ) : null}
           </Text>
         ) : null}
 
@@ -205,7 +206,7 @@ const Input = forwardRef<TextInput, InputProps>(
             styles.inputWrapper,
             {
               borderColor,
-              backgroundColor: editable ? '#111827' : '#1f2933',
+              backgroundColor: editable ? BG : "#f3f4f6",
               paddingVertical: sizeStyles.paddingVertical,
               paddingHorizontal: sizeStyles.paddingHorizontal,
             },
@@ -213,18 +214,22 @@ const Input = forwardRef<TextInput, InputProps>(
             containerStyle,
           ]}
         >
-          {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
+          {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
 
           <TextInput
             ref={ref}
             value={value}
-            onChangeText={handleChangeText}
+            onChangeText={(text: string) => {
+              const next = trimEnd ? text.replace(/\s+$/, "") : text;
+              onChangeText?.(next);
+            }}
             onBlur={handleBlur}
+            onFocus={handleFocus}
             editable={editable}
-            placeholderTextColor="#6b7280"
+            placeholderTextColor={placeholderTextColor}
             style={[
               styles.input,
-              { fontSize: sizeStyles.fontSize },
+              { fontSize: sizeStyles.fontSize, color: editable ? TEXT : MUTED },
               leftIcon ? styles.inputWithLeftIcon : undefined,
               (rightIcon || getValidationIcon())
                 ? styles.inputWithRightIcon
@@ -234,92 +239,88 @@ const Input = forwardRef<TextInput, InputProps>(
             {...rest}
           />
 
-          {(rightIcon || getValidationIcon()) && (
-            <View style={styles.iconRight}>
-              {rightIcon || getValidationIcon()}
-            </View>
-          )}
+          {(rightIcon || getValidationIcon()) ? (
+            <View style={styles.iconRight}>{rightIcon || getValidationIcon()}</View>
+          ) : null}
         </View>
 
-        {showError && (
+        {showError ? (
           <View style={styles.helperRow}>
             <AlertCircle size={14} color="#dc2626" style={styles.helperIcon} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
-        )}
-
-        {helperText && !showError && (
+        ) : helperText ? (
           <Text style={styles.helperText}>{helperText}</Text>
-        )}
+        ) : null}
       </View>
     );
   }
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
+  container: { width: "100%" },
+
+  // ✅ match your page labels
   label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#e5e7eb',
+    fontSize: 11,
+    fontFamily: "Karla-Bold",
+    color: LABEL,
     marginBottom: 4,
   },
-  requiredMark: {
-    color: '#ef4444',
-  },
+  requiredMark: { color: "#ef4444" },
+
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   inputWrapperElevated: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowRadius: 2,
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.08,
   },
+
+  // ✅ match your inputs
   input: {
     flex: 1,
-    color: '#f9fafb',
-    paddingVertical: 0,
+    fontFamily: "Karla-Regular",
+    paddingVertical: 0, // wrapper controls vertical padding
   },
-  inputWithLeftIcon: {
-    marginLeft: 6,
-  },
-  inputWithRightIcon: {
-    marginRight: 6,
-  },
+
+  inputWithLeftIcon: { marginLeft: 6 },
+  inputWithRightIcon: { marginRight: 6 },
+
   iconLeft: {
-    marginRight: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginRight: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   iconRight: {
-    marginLeft: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginLeft: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
+
   helperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
   },
-  helperIcon: {
-    marginRight: 4,
-  },
+  helperIcon: { marginRight: 6 },
   errorText: {
-    fontSize: 12,
-    color: '#dc2626',
+    fontSize: 11,
+    fontFamily: "Karla-Regular",
+    color: "#dc2626",
   },
   helperText: {
-    marginTop: 4,
-    fontSize: 12,
-    color: '#9ca3af',
+    marginTop: 6,
+    fontSize: 10,
+    fontFamily: "Karla-Regular",
+    color: MUTED,
   },
 });
 

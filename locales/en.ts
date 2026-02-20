@@ -379,12 +379,88 @@ const en = {
   me_country: "Country",
   me_country_placeholder: "e.g. Malaysia",
   me_note: "Note (Optional)",
-  me_note_placeholder: "Optional"
+  me_note_placeholder: "Optional",
 
 
+  //Payment Part
+  dashboard_payment: "Payment",
+  header_payment: "Payment",
+  payment_title: "Payment",
+  payment_search_placeholder: "Search by ref / method / status...",
+  payment_empty: "No payments",
+  payment_method: "Method",
+  payment_refno: "Ref No",
+  payment_date: "Date",
+  common_load_more: "Load More",
+  payment_filter_status: "Status",
+  payment_filter_method: "Method",
+  common_search: "Search...",
 
 
+  //add payment
 
+  common_saved: "Saved",
+  common_error: "Error",
+  payment_received_pick_failed: "Failed to pick receipt file.",
+  payment_amount_required: "Please enter a valid amount",
+  payment_method_required: "Please select payment method",
+  payment_ref_required: "Please enter reference no.",
+  payment_date_required: "Please enter date",
+  payment_receipt_required: "Please upload receipt.",
+  payment_add_title: "Add Payment",
+  payment_add_subtitle: "Submit payment proof for verification",
+  payment_details: "Payment Details",
+  common_save: "Save",
+  payment_amount: "Amount",
+  payment_reference_placeholder: "TXN / bank ref / receipt no",
+
+  payment_upload_receipt: "Upload Receipt",
+  payment_tap_to_upload: "Tap to upload receipt",
+  payment_upload_hint: "Supports JPG/PNG/PDF",
+  common_change: "Change",
+  common_remove: "Remove",
+
+  //detail
+  payment_detail_title: "Payment Detail",
+  payment_detail: "Payment Detail",
+  common_edit: "Edit",
+  payment_not_found: "Payment not found",
+  common_back: "Back",
+  common_try_again: "Something went wrong. Please try again.",
+
+  payment_remark: "Remark",
+  payment_remark_placeholder: "Enter remark",
+  saving: "Saving",
+
+  tracking_get_started: "Get Started",
+  tracking_welcome_title: "Track your parcel easily",
+  tracking_welcome_subtitle:
+    "Enter a tracking number above to see the latest updates.",
+  tracking_paste: "Paste",
+  tracking_search: "Search",
+  tracking_clear: "Clear",
+  tracking_recent: "Recent",
+  tracking_clear_recent: "Clear",
+  tracking_show_less: "Less",
+  tracking_show_more: "More",
+
+  forgot_title: "Forgot Password",
+  forgot_subtitle: "Enter your username or email. We will send reset instructions",
+  forgot_username_email_label: "Username/Email",
+  forgot_username_email_placeholder: "Enter username or email",
+  forgot_back_to_login: "Back to Login",
+  forgot_submit_button: "Send Reset Link",
+  forgot_success: "Reset instructions have been sent",
+  forgot_error: "Request failed",
+  common_success: "Success",
+  forgot_missing_fields: "Please enter your username or email",
+
+  common_not_found: "Not found",
+  common_action_failed: "Failed",
+  payment_attachment: "Attachment",
+  common_processing: "Processing",
+  common_close: "Close",
+  common_view: "View",
 
 
 };

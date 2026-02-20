@@ -1,20 +1,20 @@
 // app/(tabs)/parcel/index.tsx
 
-import React, { useState } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AppHeader } from "../../../components/AppHeader";
+import SectionCard from "../../../components/card/SectionCard";
 import ScreenHero from "../../../components/layout/ScreenHero";
 import SearchBar from "../../../components/search/SearchBar";
-import SectionCard from "../../../components/card/SectionCard";
 
 const ORANGE = "#f59e0b";
 
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
         color: "#6b7280",
     },
     customerName: {
-        fontSize: 12,
+        fontSize: 13,
         fontFamily: "Karla-Bold",
         color: "#111827",
         marginBottom: 8,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     emptyText: {
-        fontSize: 12,
+        fontSize: 13,
         fontFamily: "Karla-Regular",
         color: "#9ca3af",
     },
